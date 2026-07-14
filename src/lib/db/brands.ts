@@ -1,121 +1,77 @@
-import { createServerSupabase } from "@/lib/supabase/server";
-import type { Brand, BrandWithCategory } from "@/types";
+import { prisma } from "@/lib/prisma";
 
-/**
- * Get all brands with category info.
- */
-export async function getAllBrands(): Promise<BrandWithCategory[]> {
-  const supabase = await createServerSupabase();
+export async function getAllBrands() {
+  const brands = await prisma.brand.findMany({
+    include: {
+      category: true,
+    },
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+  });
 
-  const { data, error } = await supabase
-    .from("brands")
-    .select(
-      `
-      *,
-      categories!inner(name)
-    `
-    )
-    .order("sort_order")
-    .order("name");
-
-  if (error) {
-    console.error("Error fetching brands:", error);
-    return [];
-  }
-
-  return (data || []).map((item: any) => ({
-    ...item,
-    category_name: item.categories?.name || "",
+  return brands.map((b) => ({
+    id: b.id,
+    name: b.name,
+    category_id: b.categoryId,
+    slug: b.slug,
+    sort_order: b.sortOrder,
+    is_active: b.isActive,
+    created_at: b.createdAt.toISOString(),
+    updated_at: b.updatedAt.toISOString(),
+    category_name: b.category.name,
   }));
 }
 
-/**
- * Get brands by category slug.
- */
-export async function getBrandsByCategory(
-  categorySlug: string
-): Promise<Brand[]> {
-  const supabase = await createServerSupabase();
+export async function getBrandsByCategory(categorySlug: string) {
+  const brands = await prisma.brand.findMany({
+    where: {
+      isActive: true,
+      category: { slug: categorySlug },
+    },
+    orderBy: [{ sortOrder: "asc" }, { name: "asc" }],
+  });
 
-  const { data, error } = await supabase
-    .from("brands")
-    .select(
-      `
-      *,
-      categories!inner(slug)
-    `
-    )
-    .eq("categories.slug", categorySlug)
-    .eq("is_active", true)
-    .order("sort_order")
-    .order("name");
-
-  if (error) {
-    console.error("Error fetching brands:", error);
-    return [];
-  }
-
-  return data || [];
+  return brands.map((b) => ({
+    id: b.id,
+    name: b.name,
+    category_id: b.categoryId,
+    slug: b.slug,
+    sort_order: b.sortOrder,
+    is_active: b.isActive,
+    created_at: b.createdAt.toISOString(),
+    updated_at: b.updatedAt.toISOString(),
+  }));
 }
 
-/**
- * Create a new brand.
- */
 export async function createBrand(data: {
   category_id: number;
   name: string;
   slug: string;
-}): Promise<Brand | null> {
-  const supabase = await createServerSupabase();
-
-  const { data: result, error } = await supabase
-    .from("brands")
-    .insert(data)
-    .select()
-    .single();
-
-  if (error) {
-    console.error("Error creating brand:", error);
-    return null;
-  }
-
-  return result;
+}) {
+  return prisma.brand.create({
+    data: {
+      categoryId: data.category_id,
+      name: data.name,
+      slug: data.slug,
+    },
+  });
 }
 
-/**
- * Update a brand.
- */
 export async function updateBrand(
   id: number,
   data: { name?: string; category_id?: number; is_active?: boolean }
 ): Promise<boolean> {
-  const supabase = await createServerSupabase();
-
-  const { error } = await supabase
-    .from("brands")
-    .update({ ...data, updated_at: new Date().toISOString() })
-    .eq("id", id);
-
-  if (error) {
-    console.error("Error updating brand:", error);
-    return false;
-  }
-
+  await prisma.brand.update({
+    where: { id },
+    data: {
+      ...(data.name !== undefined && { name: data.name }),
+      ...(data.category_id !== undefined && { categoryId: data.category_id }),
+      ...(data.is_active !== undefined && { isActive: data.is_active }),
+    },
+  });
   return true;
 }
 
-/**
- * Delete a brand.
- */
 export async function deleteBrand(id: number): Promise<boolean> {
-  const supabase = await createServerSupabase();
-
-  const { error } = await supabase.from("brands").delete().eq("id", id);
-
-  if (error) {
-    console.error("Error deleting brand:", error);
-    return false;
-  }
-
+  await prisma.brand.delete({ where: { id } });
   return true;
 }

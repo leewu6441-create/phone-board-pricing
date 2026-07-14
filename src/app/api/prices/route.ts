@@ -1,46 +1,53 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerSupabase } from "@/lib/supabase/server";
+import { prisma } from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const category = searchParams.get("category");
   const search = searchParams.get("search");
 
-  const supabase = await createServerSupabase();
-
-  let query = supabase
-    .from("price_entries")
-    .select(
-      `
-      *,
-      device_models!inner(
-        id, name, brand_id,
-        brands!inner(
-          id, name,
-          categories!inner(slug)
-        )
-      )
-    `
-    )
-    .eq("is_active", true)
-    .order("sort_order")
-    .order("device_model_id");
+  let where: any = { isActive: true };
 
   if (category) {
-    query = query.eq("device_models.brands.categories.slug", category);
+    where.deviceModel = {
+      brand: {
+        category: { slug: category },
+      },
+    };
   }
 
   if (search) {
-    query = query.or(
-      `device_models.name.ilike.%${search}%,device_models.brands.name.ilike.%${search}%,variant.ilike.%${search}%`
-    );
+    const searchLower = search.toLowerCase();
+    where.OR = [
+      { deviceModel: { name: { contains: searchLower, mode: "insensitive" } } },
+      { deviceModel: { brand: { name: { contains: searchLower, mode: "insensitive" } } } },
+      { variant: { contains: searchLower, mode: "insensitive" } },
+    ];
   }
 
-  const { data, error } = await query;
+  const prices = await prisma.priceEntry.findMany({
+    where,
+    include: {
+      deviceModel: {
+        include: {
+          brand: {
+            include: { category: true },
+          },
+        },
+      },
+    },
+    orderBy: [{ sortOrder: "asc" }, { deviceModelId: "asc" }],
+  });
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+  const data = prices.map((p) => ({
+    id: p.id,
+    device_model_id: p.deviceModelId,
+    variant: p.variant,
+    price_vnd: Number(p.priceVnd),
+    model_name: p.deviceModel.name,
+    brand_name: p.deviceModel.brand.name,
+    category_slug: p.deviceModel.brand.category.slug,
+  }));
 
   return NextResponse.json(data);
 }

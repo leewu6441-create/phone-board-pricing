@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_URL")
+  directUrl = env("POSTGRES_URL")
+}
+
+model Category {
+  id         Int      @id @default(autoincrement())
+  name       String   @db.VarChar(50)
+  slug       String   @unique @db.VarChar(50)
+  icon       String?  @db.VarChar(255)
+  sortOrder  Int      @default(0) @map("sort_order")
+  createdAt  DateTime @default(now()) @map("created_at")
+  brands     Brand[]
+
+  @@map("categories")
+}
+
+model Brand {
+  id         Int           @id @default(autoincrement())
+  categoryId Int           @map("category_id")
+  name       String        @db.VarChar(100)
+  slug       String        @db.VarChar(100)
+  logoUrl    String?       @map("logo_url") @db.VarChar(255)
+  sortOrder  Int           @default(0) @map("sort_order")
+  isActive   Boolean       @default(true) @map("is_active")
+  createdAt  DateTime      @default(now()) @map("created_at")
+  updatedAt  DateTime      @updatedAt @map("updated_at")
+  category   Category      @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  models     DeviceModel[]
+
+  @@unique([categoryId, slug])
+  @@map("brands")
+}
+
+model DeviceModel {
+  id        Int          @id @default(autoincrement())
+  brandId   Int          @map("brand_id")
+  name      String       @db.VarChar(200)
+  modelCode String?      @map("model_code") @db.VarChar(100)
+  slug      String       @db.VarChar(200)
+  sortOrder Int          @default(0) @map("sort_order")
+  isActive  Boolean      @default(true) @map("is_active")
+  createdAt DateTime     @default(now()) @map("created_at")
+  updatedAt DateTime     @updatedAt @map("updated_at")
+  brand     Brand        @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  prices    PriceEntry[]
+
+  @@unique([brandId, slug])
+  @@map("device_models")
+}
+
+model PriceEntry {
+  id             Int           @id @default(autoincrement())
+  deviceModelId  Int           @map("device_model_id")
+  variant        String        @db.VarChar(300)
+  priceVnd       BigInt        @map("price_vnd")
+  isActive       Boolean       @default(true) @map("is_active")
+  sortOrder      Int           @default(0) @map("sort_order")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+  deviceModel    DeviceModel   @relation(fields: [deviceModelId], references: [id], onDelete: Cascade)
+  priceHistories PriceHistory[]
+
+  @@map("price_entries")
+}
+
+model PriceHistory {
+  id           Int        @id @default(autoincrement())
+  priceEntryId Int        @map("price_entry_id")
+  oldPriceVnd  BigInt?    @map("old_price_vnd")
+  newPriceVnd  BigInt     @map("new_price_vnd")
+  changedBy    String?    @map("changed_by") @db.VarChar(255)
+  changedAt    DateTime   @default(now()) @map("changed_at")
+  priceEntry   PriceEntry @relation(fields: [priceEntryId], references: [id], onDelete: Cascade)
+
+  @@map("price_history")
+}
+
+model SiteSetting {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique @db.VarChar(100)
+  value     String?  @db.Text
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  @@map("site_settings")
+}
+
+model AdminUser {
+  id           Int       @id @default(autoincrement())
+  email        String    @unique @db.VarChar(255)
+  passwordHash String    @map("password_hash") @db.VarChar(255)
+  displayName  String?   @map("display_name") @db.VarChar(100)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  lastLoginAt  DateTime? @map("last_login_at")
+
+  @@map("admin_users")
+}

@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { createClient } from "@/lib/supabase/client";
 import { Smartphone } from "lucide-react";
 import { SITE_NAME } from "@/lib/constants";
 
@@ -23,14 +22,16 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
 
-      if (error) {
-        setError("Email hoặc mật khẩu không đúng. Vui lòng thử lại.");
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Email hoặc mật khẩu không đúng");
       } else {
         router.push("/admin");
         router.refresh();
@@ -77,18 +78,15 @@ export default function AdminLoginPage() {
                 required
               />
             </div>
-
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-md px-3 py-2">
                 {error}
               </div>
             )}
-
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Đang đăng nhập..." : "Đăng nhập"}
             </Button>
           </form>
-
           <p className="text-[11px] text-gray-400 text-center mt-4">
             Chỉ dành cho quản trị viên
           </p>
