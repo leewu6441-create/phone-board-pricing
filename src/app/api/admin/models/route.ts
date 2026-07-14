@@ -23,6 +23,7 @@ export async function GET() {
       is_active: m.isActive,
       brand_name: m.brand.name,
       category_name: m.brand.category.name,
+      category_slug: m.brand.category.slug,
       category_id: m.brand.category.id,
     }))
   );
