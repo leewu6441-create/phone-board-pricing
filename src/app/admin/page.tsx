@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
 import { DollarSign, Smartphone, Tag, History } from "lucide-react";
 import { formatVnd } from "@/lib/format";
+import { getExchangeRates } from "@/lib/exchange";
 
 export const dynamic = "force-dynamic";
 
@@ -19,9 +20,9 @@ async function getLangFromCookie(cookieHeader: string): Promise<string> {
 export default async function AdminDashboardPage() {
   // Note: This is a server component so we can't use useTranslation().
   // We'll use a minimal cookie-based approach for the static labels.
-  // For a full solution, we'd need to read cookies from headers.
   const t = (key: string) => translations.vi[key] || key;
 
+  const rates = await getExchangeRates();
   const totalPrices = await prisma.priceEntry.count();
   const totalModels = await prisma.deviceModel.count();
   const totalBrands = await prisma.brand.count();
@@ -53,8 +54,8 @@ export default async function AdminDashboardPage() {
                 <div key={h.id} className="flex items-center justify-between text-sm py-2 border-b border-gray-100 last:border-0">
                   <div className="flex-1 min-w-0"><p className="font-medium text-gray-900 truncate">{h.priceEntry?.deviceModel?.name || "N/A"} - {h.priceEntry?.variant || "N/A"}</p><p className="text-xs text-gray-500">{h.changedAt.toLocaleString("vi-VN")}</p></div>
                   <div className="text-right shrink-0 ml-3">
-                    {h.oldPriceVnd && <span className="text-xs text-gray-400 line-through mr-2">¥{(Number(h.oldPriceVnd) * 0.00029).toFixed(0)}</span>}
-                    <span className="font-semibold text-red-600">¥{(Number(h.newPriceVnd) * 0.00029).toFixed(0)}</span>
+                    {h.oldPriceVnd && <span className="text-xs text-gray-400 line-through mr-2">¥{(Number(h.oldPriceVnd) * rates.CNY).toFixed(0)}</span>}
+                    <span className="font-semibold text-red-600">¥{(Number(h.newPriceVnd) * rates.CNY).toFixed(0)}</span>
                     <div className="text-[10px] text-gray-400">{formatVnd(Number(h.newPriceVnd))}</div>
                   </div>
                 </div>

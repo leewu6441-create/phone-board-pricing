@@ -29,7 +29,7 @@ async function getRates(): Promise<Rates> {
     })
     .catch(() => {
       fetchPromise = null;
-      return { CNY: 0.00029, USD: 0.00004 }; // fallback
+      return { CNY: 0.000258, USD: 0.000038 }; // fallback
     });
 
   return fetchPromise;

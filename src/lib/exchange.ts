@@ -1,5 +1,6 @@
-// Exchange rate caching utility
-// Uses Frankfurter API (free, no API key required)
+// Exchange rate utility
+// Uses exchangerate-api.com (free, no key, updates daily at midnight UTC)
+// Cache refreshes daily at midnight local time
 
 interface Rates {
   CNY: number;
@@ -8,40 +9,43 @@ interface Rates {
 
 interface CacheEntry {
   rates: Rates;
-  timestamp: number;
+  date: string; // YYYY-MM-DD cache date
 }
 
 let cache: CacheEntry | null = null;
-const CACHE_TTL = 60 * 60 * 1000; // 1 hour
+
+const API_URL = "https://open.er-api.com/v6/latest/VND";
 
 export async function getExchangeRates(): Promise<Rates> {
-  // Return cached if fresh
-  if (cache && Date.now() - cache.timestamp < CACHE_TTL) {
+  const today = new Date().toISOString().split("T")[0];
+
+  // Return cached if same day
+  if (cache && cache.date === today) {
     return cache.rates;
   }
 
   try {
-    const res = await fetch("https://api.frankfurter.app/latest?from=VND&to=USD,CNY");
+    const res = await fetch(API_URL);
     if (!res.ok) throw new Error("Failed to fetch rates");
 
     const data = await res.json();
 
-    cache = {
-      rates: {
-        CNY: data.rates.CNY,
-        USD: data.rates.USD,
-      },
-      timestamp: Date.now(),
-    };
-
-    return cache.rates;
+    if (data.result === "success" && data.rates) {
+      cache = {
+        rates: {
+          CNY: data.rates.CNY,
+          USD: data.rates.USD,
+        },
+        date: today,
+      };
+      return cache.rates;
+    }
+    throw new Error("Invalid response");
   } catch (error) {
     console.error("Exchange rate fetch failed:", error);
-    // Return stale cache if available, otherwise fallback rates
+    // Return stale cache or fallback
     if (cache) return cache.rates;
-
-    // Fallback rates (approximate, updated manually)
-    return { CNY: 0.00029, USD: 0.00004 };
+    return { CNY: 0.000258, USD: 0.000038 };
   }
 }
 
@@ -56,11 +60,8 @@ export function convertVnd(
 
 export function getCurrencyForLang(lang: string): "VND" | "CNY" | "USD" {
   switch (lang) {
-    case "zh":
-      return "CNY";
-    case "en":
-      return "USD";
-    default:
-      return "VND";
+    case "zh": return "CNY";
+    case "en": return "USD";
+    default:   return "VND";
   }
 }
