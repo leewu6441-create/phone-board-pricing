@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --radius: 0.5rem;
+}
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 antialiased;
+  }
+}
+
+@layer components {
+  /* Price card styling */
+  .price-card {
+    @apply bg-white rounded-lg border border-gray-100 p-4 transition-shadow hover:shadow-md;
+  }
+
+  /* Price highlight */
+  .price-value {
+    @apply text-lg font-bold text-danger-500;
+  }
+
+  /* Admin table */
+  .admin-table {
+    @apply w-full text-sm text-left;
+  }
+
+  .admin-table th {
+    @apply px-4 py-3 bg-gray-50 text-gray-600 font-medium text-xs uppercase tracking-wider;
+  }
+
+  .admin-table td {
+    @apply px-4 py-3 border-t border-gray-100;
+  }
+
+  .admin-table tr:hover td {
+    @apply bg-gray-50/50;
+  }
+
+  /* Floating action button */
+  .floating-btn {
+    @apply fixed z-50 flex items-center justify-center w-14 h-14 rounded-full shadow-lg transition-all duration-300 hover:scale-110 active:scale-95;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
