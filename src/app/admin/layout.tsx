@@ -1,6 +1,6 @@
-import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { redirect } from "next/navigation";
 
 export default async function AdminLayout({
   children,
@@ -9,8 +9,11 @@ export default async function AdminLayout({
 }) {
   const session = await getSession();
 
+  // Middleware already protects non-login routes, but layout needs to handle
+  // the fact that login page also goes through this layout
   if (!session) {
-    redirect("/admin/login");
+    // Render login page without sidebar
+    return <>{children}</>;
   }
 
   return (
