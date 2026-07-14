@@ -5,23 +5,37 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { formatVnd } from "@/lib/format";
+import { formatPrice, formatVnd } from "@/lib/format";
 import { useTranslation } from "@/lib/i18n";
+import { convertVnd } from "@/lib/exchange";
 import { Plus, Trash2, Save, Check, X, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface PriceData { id: number; device_model_id: number; variant: string; price_vnd: number; is_active: boolean; model_name: string; brand_name: string; category_slug: string; }
 interface ModelOption { id: number; name: string; brand_name: string; category_slug: string; }
+interface Rates { CNY: number; USD: number; }
+
+let adminRatesCache: Rates | null = null;
+
+async function getAdminRates(): Promise<Rates> {
+  if (adminRatesCache) return adminRatesCache;
+  const res = await fetch("/api/exchange-rates");
+  adminRatesCache = await res.json();
+  return adminRatesCache!;
+}
 
 export default function AdminPricesPage() {
   const { t } = useTranslation();
   const [prices, setPrices] = useState<PriceData[]>([]);
   const [models, setModels] = useState<ModelOption[]>([]);
   const [loading, setLoading] = useState(true);
+  const [rates, setRates] = useState<Rates | null>(adminRatesCache);
   const [saving, setSaving] = useState(false);
   const [editingCell, setEditingCell] = useState<{id: number; field: "variant" | "price_vnd"; value: string} | null>(null);
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterModel, setFilterModel] = useState("all");
+
+  useEffect(() => { getAdminRates().then(setRates); }, []);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -33,6 +47,7 @@ export default function AdminPricesPage() {
 
   const filtered = prices.filter((p) => { if (filterCategory !== "all" && p.category_slug !== filterCategory) return false; if (filterModel !== "all" && p.device_model_id !== parseInt(filterModel)) return false; return true; });
   const availModels = models.filter((m) => filterCategory === "all" || m.category_slug === filterCategory);
+  const cnyRate = rates?.CNY || 0.00029;
 
   const startEdit = (id: number, field: "variant" | "price_vnd", value: string) => setEditingCell({ id, field, value });
 
@@ -86,14 +101,22 @@ export default function AdminPricesPage() {
       <div className="space-y-6">
         {Object.entries(grouped).map(([mid, mprices]) => { const model = models.find((m) => m.id === parseInt(mid)); return (
           <Card key={mid}><CardHeader className="pb-2"><div className="flex items-center gap-2"><Badge variant="secondary">{model?.brand_name || ""}</Badge><Badge variant={model?.category_slug === "apple" ? "default" : "outline"}>{model?.category_slug === "apple" ? "🍎" : "🤖"}</Badge><CardTitle className="text-base">{model?.name || `Model #${mid}`}</CardTitle></div></CardHeader>
-            <CardContent><table className="admin-table"><thead><tr><th className="w-8">#</th><th>{t("admin.colVersion")}</th><th className="w-48 text-right">{t("admin.colPrice")}</th><th className="w-20 text-center">{t("admin.colDelete")}</th></tr></thead>
-              <tbody>{mprices.map((price, idx) => (
+            <CardContent><table className="admin-table"><thead><tr><th className="w-8">#</th><th>{t("admin.colVersion")}</th><th className="w-48 text-right">¥ CNY</th><th className="w-40 text-right">VND (gốc)</th><th className="w-20 text-center">{t("admin.colDelete")}</th></tr></thead>
+              <tbody>{mprices.map((price, idx) => {
+                const cnyPrice = convertVnd(price.price_vnd, "CNY", { CNY: cnyRate, USD: 0.00004 });
+                return (
                 <tr key={price.id}><td className="text-gray-400 text-xs">{idx + 1}</td>
                   <td>{editingCell?.id === price.id && editingCell?.field === "variant" ? (<div className="flex items-center gap-1"><Input value={editingCell.value} onChange={(e) => setEditingCell({ ...editingCell, value: e.target.value })} className="h-8 text-sm" autoFocus onKeyDown={(e) => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") setEditingCell(null); }} /><Button size="icon" variant="ghost" className="h-7 w-7" onClick={saveEdit}><Check size={14} className="text-green-600" /></Button><Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setEditingCell(null)}><X size={14} className="text-red-600" /></Button></div>) : (<span className="cursor-pointer hover:text-primary-600 hover:underline" onClick={() => startEdit(price.id, "variant", price.variant)}>{price.variant}</span>)}</td>
-                  <td className="text-right">{editingCell?.id === price.id && editingCell?.field === "price_vnd" ? (<div className="flex items-center gap-1 justify-end"><Input value={editingCell.value} onChange={(e) => setEditingCell({ ...editingCell, value: e.target.value })} className="h-8 text-sm w-40 text-right" autoFocus onKeyDown={(e) => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") setEditingCell(null); }} /><Button size="icon" variant="ghost" className="h-7 w-7" onClick={saveEdit}><Check size={14} className="text-green-600" /></Button><Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setEditingCell(null)}><X size={14} className="text-red-600" /></Button></div>) : (<span className="cursor-pointer font-semibold text-red-600 hover:underline" onClick={() => startEdit(price.id, "price_vnd", price.price_vnd.toString())}>{formatVnd(price.price_vnd)}</span>)}</td>
+                  {/* CNY display */}
+                  <td className="text-right">
+                    <span className="font-semibold text-red-600">{formatPrice(cnyPrice, "CNY")}</span>
+                  </td>
+                  {/* VND editable */}
+                  <td className="text-right">
+                    {editingCell?.id === price.id && editingCell?.field === "price_vnd" ? (<div className="flex items-center gap-1 justify-end"><Input value={editingCell.value} onChange={(e) => setEditingCell({ ...editingCell, value: e.target.value })} className="h-8 text-sm w-36 text-right" autoFocus onKeyDown={(e) => { if (e.key === "Enter") saveEdit(); if (e.key === "Escape") setEditingCell(null); }} /><Button size="icon" variant="ghost" className="h-7 w-7" onClick={saveEdit}><Check size={14} className="text-green-600" /></Button><Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => setEditingCell(null)}><X size={14} className="text-red-600" /></Button></div>) : (<span className="cursor-pointer text-gray-500 hover:underline text-xs" onClick={() => startEdit(price.id, "price_vnd", price.price_vnd.toString())}>{formatVnd(price.price_vnd)}</span>)}</td>
                   <td className="text-center"><Button variant="ghost" size="icon" className="h-7 w-7 text-gray-400 hover:text-red-600" onClick={() => handleDelete(price.id, price.variant)}><Trash2 size={14} /></Button></td>
                 </tr>
-              ))}{mprices.length === 0 && <tr><td colSpan={4} className="text-center text-gray-400 py-6">{t("admin.noData")}</td></tr>}</tbody></table></CardContent>
+              )})}{mprices.length === 0 && <tr><td colSpan={5} className="text-center text-gray-400 py-6">{t("admin.noData")}</td></tr>}</tbody></table></CardContent>
           </Card>
         );})}
         {Object.keys(grouped).length === 0 && <Card><CardContent className="py-12 text-center text-gray-400">{t("admin.noDataYet")}</CardContent></Card>}

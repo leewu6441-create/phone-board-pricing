@@ -52,7 +52,11 @@ export default async function AdminDashboardPage() {
               {recentHistory.map((h) => (
                 <div key={h.id} className="flex items-center justify-between text-sm py-2 border-b border-gray-100 last:border-0">
                   <div className="flex-1 min-w-0"><p className="font-medium text-gray-900 truncate">{h.priceEntry?.deviceModel?.name || "N/A"} - {h.priceEntry?.variant || "N/A"}</p><p className="text-xs text-gray-500">{h.changedAt.toLocaleString("vi-VN")}</p></div>
-                  <div className="text-right shrink-0 ml-3">{h.oldPriceVnd && <span className="text-xs text-gray-400 line-through mr-2">{Number(h.oldPriceVnd).toLocaleString("vi-VN")}</span>}<span className="font-semibold text-red-600">{formatVnd(Number(h.newPriceVnd))}</span></div>
+                  <div className="text-right shrink-0 ml-3">
+                    {h.oldPriceVnd && <span className="text-xs text-gray-400 line-through mr-2">¥{(Number(h.oldPriceVnd) * 0.00029).toFixed(0)}</span>}
+                    <span className="font-semibold text-red-600">¥{(Number(h.newPriceVnd) * 0.00029).toFixed(0)}</span>
+                    <div className="text-[10px] text-gray-400">{formatVnd(Number(h.newPriceVnd))}</div>
+                  </div>
                 </div>
               ))}
             </div>
