@@ -1,14 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
-import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/constants";
+import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: {
-    default: SITE_NAME,
-    template: `%s | ${SITE_NAME}`,
+    default: "Bảng Giá Mainboard",
+    template: "%s | Bảng Giá Mainboard",
   },
-  description: SITE_DESCRIPTION,
+  description: "Bảng giá thu mua mainboard điện thoại - Cập nhật mỗi ngày",
   keywords: [
     "bảng giá mainboard",
     "thu mua mainboard",
@@ -32,16 +32,16 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body className="min-h-screen font-sans">
-        {children}
-        <Toaster
-          position="top-center"
-          richColors
-          toastOptions={{
-            style: {
-              fontSize: "14px",
-            },
-          }}
-        />
+        <Providers>
+          {children}
+          <Toaster
+            position="top-center"
+            richColors
+            toastOptions={{
+              style: { fontSize: "14px" },
+            }}
+          />
+        </Providers>
       </body>
     </html>
   );

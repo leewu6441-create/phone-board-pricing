@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { VndPrice } from "@/components/shared/VndPrice";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Search } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
 import { DEFAULT_ZALO_LINK, DEFAULT_FACEBOOK_LINK } from "@/lib/constants";
 
 interface PriceData {
@@ -21,6 +22,7 @@ interface PriceData {
 }
 
 export default function SearchPage() {
+  const { t } = useTranslation();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PriceData[]>([]);
   const [allPrices, setAllPrices] = useState<PriceData[]>([]);
@@ -52,18 +54,12 @@ export default function SearchPage() {
       <PublicHeader />
       <main className="flex-1">
         <div className="max-w-4xl mx-auto px-4 py-6 space-y-4">
-          <h2 className="text-xl font-bold text-gray-900">🔍 Tìm kiếm</h2>
+          <h2 className="text-xl font-bold text-gray-900">🔍 {t("search.title")}</h2>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <Input
-              placeholder="Nhập tên máy, hãng hoặc phiên bản..."
-              value={query}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="pl-10 h-12 text-base"
-              autoFocus
-            />
+            <Input placeholder={t("search.placeholder")} value={query} onChange={(e) => handleSearch(e.target.value)} className="pl-10 h-12 text-base" autoFocus />
           </div>
-          {query && <p className="text-sm text-gray-500">{results.length > 0 ? `Tìm thấy ${results.length} kết quả` : `Không tìm thấy kết quả`}</p>}
+          {query && <p className="text-sm text-gray-500">{results.length > 0 ? t("search.found", { count: results.length }) : t("search.notFound")}</p>}
           {loading ? (
             <div className="space-y-3">{[...Array(3)].map((_, i) => <div key={i} className="animate-pulse"><div className="h-16 bg-gray-200 rounded-lg" /></div>)}</div>
           ) : query && results.length > 0 ? (
@@ -73,7 +69,7 @@ export default function SearchPage() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-0.5">
                       <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 font-medium">{p.brand_name}</span>
-                      <span className="text-xs px-1.5 py-0.5 rounded bg-primary-50 text-primary-700">{p.category_slug === "apple" ? "🍎 Apple" : "🤖 Android"}</span>
+                      <span className="text-xs px-1.5 py-0.5 rounded bg-primary-50 text-primary-700">{p.category_slug === "apple" ? "🍎 " + t("search.categoryApple") : "🤖 " + t("search.categoryAndroid")}</span>
                     </div>
                     <p className="font-medium text-gray-900 text-sm">{p.model_name}</p>
                     <p className="text-xs text-gray-500 truncate">{p.variant}</p>
@@ -83,9 +79,9 @@ export default function SearchPage() {
               ))}
             </div>
           ) : query && results.length === 0 ? (
-            <EmptyState title="Không tìm thấy" description={`Không có kết quả nào cho "${query}". Vui lòng thử từ khóa khác.`} />
+            <EmptyState title={t("search.notFound")} description={t("search.notFoundFor", { query }) + ". " + t("search.notFoundHint")} />
           ) : (
-            <div className="text-center py-12 text-gray-400"><Search className="mx-auto h-12 w-12 mb-3 opacity-30" /><p>Nhập tên máy hoặc hãng để tìm kiếm</p></div>
+            <div className="text-center py-12 text-gray-400"><Search className="mx-auto h-12 w-12 mb-3 opacity-30" /><p>{t("search.idleHint")}</p></div>
           )}
         </div>
       </main>
