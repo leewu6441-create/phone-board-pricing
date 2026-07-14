@@ -76,13 +76,13 @@ export async function GET() {
     const priceCount = await prisma.priceEntry.count();
     if (priceCount === 0 && ip15pm && ip15p) {
       const samples = [
-        { deviceModelId: ip15pm.id, variant: "256GB | Còn Face ID", priceVnd: 12500000n },
-        { deviceModelId: ip15pm.id, variant: "256GB | Mất Face ID", priceVnd: 8200000n },
-        { deviceModelId: ip15pm.id, variant: "512GB | Còn Face ID", priceVnd: 14000000n },
-        { deviceModelId: ip15pm.id, variant: "512GB | Mất Face ID", priceVnd: 9500000n },
-        { deviceModelId: ip15p.id, variant: "256GB | Còn Face ID", priceVnd: 10000000n },
-        { deviceModelId: ip15p.id, variant: "256GB | Mất Face ID", priceVnd: 7000000n },
-        { deviceModelId: ip15p.id, variant: "128GB | Còn Face ID", priceVnd: 8500000n },
+        { deviceModelId: ip15pm.id, variant: "256GB | Còn Face ID", priceVnd: BigInt(12500000) },
+        { deviceModelId: ip15pm.id, variant: "256GB | Mất Face ID", priceVnd: BigInt(8200000) },
+        { deviceModelId: ip15pm.id, variant: "512GB | Còn Face ID", priceVnd: BigInt(14000000) },
+        { deviceModelId: ip15pm.id, variant: "512GB | Mất Face ID", priceVnd: BigInt(9500000) },
+        { deviceModelId: ip15p.id, variant: "256GB | Còn Face ID", priceVnd: BigInt(10000000) },
+        { deviceModelId: ip15p.id, variant: "256GB | Mất Face ID", priceVnd: BigInt(7000000) },
+        { deviceModelId: ip15p.id, variant: "128GB | Còn Face ID", priceVnd: BigInt(8500000) },
       ];
       for (const p of samples) {
         await prisma.priceEntry.create({ data: p });
