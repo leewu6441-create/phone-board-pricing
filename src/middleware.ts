@@ -1,11 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
-  const isLoginPage = request.nextUrl.pathname === "/admin/login";
-  const isAdminApi = request.nextUrl.pathname.startsWith("/api/admin");
+  const pathname = request.nextUrl.pathname;
+  const isAdminRoute = pathname.startsWith("/admin");
+  const isLoginPage = pathname === "/admin/login";
+  const isAdminApi = pathname.startsWith("/api/admin");
+  const isLoginApi = pathname === "/api/admin/login";
+  const isLogoutApi = pathname === "/api/admin/logout";
 
-  if ((isAdminRoute && !isLoginPage) || isAdminApi) {
+  if ((isAdminRoute && !isLoginPage) || (isAdminApi && !isLoginApi && !isLogoutApi)) {
     const token = request.cookies.get("admin_session")?.value;
 
     if (!token) {
