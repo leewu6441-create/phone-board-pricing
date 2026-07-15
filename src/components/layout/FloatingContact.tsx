@@ -13,16 +13,13 @@ import {
 } from "@/components/ui/dialog";
 
 interface FloatingContactProps {
-  zaloLink: string;
   facebookLink: string;
-  qrcodeImage: string;
   wechatId: string;
-  wechatQrcode: string;
 }
 
-export function FloatingContact({ zaloLink, facebookLink, qrcodeImage, wechatId, wechatQrcode }: FloatingContactProps) {
+export function FloatingContact({ facebookLink, wechatId }: FloatingContactProps) {
   const [expanded, setExpanded] = useState(false);
-  const [qrOpen, setQrOpen] = useState(false);
+  const [zaloQrOpen, setZaloQrOpen] = useState(false);
   const [wechatOpen, setWechatOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const { t } = useTranslation();
@@ -44,9 +41,6 @@ export function FloatingContact({ zaloLink, facebookLink, qrcodeImage, wechatId,
     }
   };
 
-  const showWechatBtn = wechatId || wechatQrcode;
-  const showZaloQrBtn = !!qrcodeImage;
-
   return (
     <>
       <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
@@ -58,18 +52,18 @@ export function FloatingContact({ zaloLink, facebookLink, qrcodeImage, wechatId,
               : "opacity-0 scale-75 translate-y-4 pointer-events-none"
           )}
         >
-          {showZaloQrBtn && (
-            <button
-              onClick={() => { setQrOpen(true); setExpanded(false); }}
-              className="flex items-center gap-2 bg-[#10B981] text-white px-4 py-2.5 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105"
-              title={t("contact.qrCode")}
-            >
-              <QrCode size={20} />
-              <span className="text-sm font-medium whitespace-nowrap">{t("contact.qrCode")}</span>
-            </button>
-          )}
+          {/* Zalo QR Code — only contact method for Zalo */}
+          <button
+            onClick={() => { setZaloQrOpen(true); setExpanded(false); }}
+            className="flex items-center gap-2 bg-[#0068FF] text-white px-4 py-2.5 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105"
+            title={t("contact.qrCode")}
+          >
+            <QrCode size={20} />
+            <span className="text-sm font-medium whitespace-nowrap">{t("contact.chatZalo")}</span>
+          </button>
 
-          {showWechatBtn && (
+          {/* WeChat */}
+          {wechatId && (
             <button
               onClick={() => { setWechatOpen(true); setExpanded(false); }}
               className="flex items-center gap-2 bg-[#07C160] text-white px-4 py-2.5 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105"
@@ -80,6 +74,7 @@ export function FloatingContact({ zaloLink, facebookLink, qrcodeImage, wechatId,
             </button>
           )}
 
+          {/* Facebook */}
           <a
             href={facebookLink}
             target="_blank"
@@ -89,17 +84,6 @@ export function FloatingContact({ zaloLink, facebookLink, qrcodeImage, wechatId,
           >
             <Facebook size={20} />
             <span className="text-sm font-medium whitespace-nowrap">{t("contact.fbGroup")}</span>
-          </a>
-
-          <a
-            href={zaloLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 bg-[#0068FF] text-white px-4 py-2.5 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105"
-            title={t("contact.zalo")}
-          >
-            <MessageCircle size={20} />
-            <span className="text-sm font-medium whitespace-nowrap">{t("contact.chatZalo")}</span>
           </a>
         </div>
 
@@ -116,18 +100,23 @@ export function FloatingContact({ zaloLink, facebookLink, qrcodeImage, wechatId,
       </div>
 
       {/* Zalo QR Code Dialog */}
-      <Dialog open={qrOpen} onOpenChange={setQrOpen}>
+      <Dialog open={zaloQrOpen} onOpenChange={setZaloQrOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>{t("contact.qrCode")}</DialogTitle>
+            <DialogTitle>{t("contact.chatZalo")}</DialogTitle>
             <DialogDescription>{t("contact.scanQr")}</DialogDescription>
           </DialogHeader>
           <div className="flex items-center justify-center p-4">
             <img
-              src={qrcodeImage}
-              alt="QR Code Zalo"
+              src="/api/qrcode?type=zalo"
+              alt="Zalo QR Code"
               className="max-w-full h-auto rounded-lg"
               style={{ maxHeight: "300px" }}
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = "none";
+                (e.target as HTMLImageElement).parentElement!.innerHTML =
+                  '<div class="w-64 h-64 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 text-sm">QR code not set up yet</div>';
+              }}
             />
           </div>
         </DialogContent>
@@ -141,16 +130,15 @@ export function FloatingContact({ zaloLink, facebookLink, qrcodeImage, wechatId,
             <DialogDescription>{t("contact.scanQr")}</DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center gap-4 p-2">
-            {wechatQrcode ? (
-              <img
-                src={wechatQrcode}
-                alt="WeChat QR Code"
-                className="max-w-full h-auto rounded-lg"
-                style={{ maxHeight: "280px" }}
-              />
-            ) : (
-              <MessageSquareText size={64} className="text-[#07C160]" />
-            )}
+            <img
+              src="/api/qrcode?type=wechat"
+              alt="WeChat QR Code"
+              className="max-w-full h-auto rounded-lg"
+              style={{ maxHeight: "280px" }}
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = "none";
+              }}
+            />
             {wechatId && (
               <div className="text-center space-y-3 w-full">
                 <div className="flex items-center justify-center gap-2">

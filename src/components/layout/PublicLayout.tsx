@@ -16,11 +16,8 @@ export async function PublicLayout({ children }: PublicLayoutProps) {
       <main className="flex-1">{children}</main>
       <PublicFooter />
       <FloatingContact
-        zaloLink={settings.zalo_link || "https://zalo.me/your-zalo-phone"}
         facebookLink={settings.facebook_link || "https://facebook.com/groups/your-group"}
-        qrcodeImage={settings.qrcode_image || ""}
         wechatId={settings.wechat_id || ""}
-        wechatQrcode={settings.wechat_qrcode || ""}
       />
     </div>
   );
