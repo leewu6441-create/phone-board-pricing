@@ -11,18 +11,26 @@ interface PublicLayoutProps {
 export async function PublicLayout({ children }: PublicLayoutProps) {
   const settings = await getAllSettings();
 
-  let adImages: string[] = [];
+  let adMedia: { type: "image" | "video"; data: string }[] = [];
   try {
-    const raw = settings.ad_images || "";
-    if (raw) adImages = JSON.parse(raw);
+    const raw = settings.ad_media || settings.ad_images || "";
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        // Support both old format (plain strings) and new format (objects)
+        adMedia = parsed.map((item: any) =>
+          typeof item === "string" ? { type: "image", data: item } : item
+        );
+      }
+    }
   } catch {
-    adImages = [];
+    adMedia = [];
   }
 
   return (
     <div className="flex flex-col min-h-screen">
       <PublicHeader />
-      <AdBanner images={adImages} tickerText={settings.ticker_text || ""} />
+      <AdBanner media={adMedia} tickerText={settings.ticker_text || ""} />
       <main className="flex-1">{children}</main>
       <PublicFooter />
       <FloatingContact

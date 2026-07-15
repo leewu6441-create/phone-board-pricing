@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button"; import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useTranslation } from "@/lib/i18n";
-import { Save, Loader2, Facebook, Globe, Bell, QrCode, MessageSquareText, Upload, X, Image, Plus, Trash2 } from "lucide-react"; import { toast } from "sonner";
+import { Save, Loader2, Facebook, Globe, Bell, QrCode, MessageSquareText, Upload, X, Image, Plus, Video } from "lucide-react"; import { toast } from "sonner";
 
 export default function AdminSettingsPage() {
   const { t } = useTranslation();
@@ -12,15 +12,16 @@ export default function AdminSettingsPage() {
   const [qrcode, setQrcode] = useState("");
   const [wechat, setWechat] = useState("");
   const [wechatQrcode, setWechatQrcode] = useState("");
-  const [adImages, setAdImages] = useState<string[]>([]);
+  const [adMedia, setAdMedia] = useState<{ type: "image" | "video"; data: string }[]>([]);
   const [tickerText, setTickerText] = useState("");
   const [notice, setNotice] = useState(""); const [phone, setPhone] = useState(""); const [site, setSite] = useState("");
   const [saving, setSaving] = useState(false); const [loading, setLoading] = useState(true);
   const zaloQrRef = useRef<HTMLInputElement>(null);
   const wechatQrRef = useRef<HTMLInputElement>(null);
   const adImageRef = useRef<HTMLInputElement>(null);
+  const adVideoRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => { fetch("/api/admin/settings").then((r) => r.json()).then((data: any[]) => { data.forEach((s: any) => { switch (s.key) { case "facebook_link": setFb(s.value); break; case "qrcode_image": setQrcode(s.value); break; case "wechat_id": setWechat(s.value); break; case "wechat_qrcode": setWechatQrcode(s.value); break; case "ad_images": try { setAdImages(JSON.parse(s.value || "[]")); } catch { setAdImages([]); } break; case "ticker_text": setTickerText(s.value); break; case "notice_text": setNotice(s.value); break; case "contact_phone": setPhone(s.value); break; case "site_name": setSite(s.value); break; } }); setLoading(false); }).catch(() => setLoading(false)); }, []);
+  useEffect(() => { fetch("/api/admin/settings").then((r) => r.json()).then((data: any[]) => { data.forEach((s: any) => { switch (s.key) { case "facebook_link": setFb(s.value); break; case "qrcode_image": setQrcode(s.value); break; case "wechat_id": setWechat(s.value); break; case "wechat_qrcode": setWechatQrcode(s.value); break; case "ad_media": case "ad_images": try { const p = JSON.parse(s.value || "[]"); setAdMedia(Array.isArray(p) ? p.map((item: any) => typeof item === "string" ? { type: "image", data: item } : item) : []); } catch { setAdMedia([]); } break; case "ticker_text": setTickerText(s.value); break; case "notice_text": setNotice(s.value); break; case "contact_phone": setPhone(s.value); break; case "site_name": setSite(s.value); break; } }); setLoading(false); }).catch(() => setLoading(false)); }, []);
 
   const save = (k: string, v: string) => fetch("/api/admin/settings", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ key: k, value: v }) });
 
@@ -28,7 +29,7 @@ export default function AdminSettingsPage() {
     setSaving(true);
     await Promise.all([
       save("facebook_link", fb), save("qrcode_image", qrcode), save("wechat_id", wechat), save("wechat_qrcode", wechatQrcode),
-      save("ad_images", JSON.stringify(adImages)), save("ticker_text", tickerText),
+      save("ad_media", JSON.stringify(adMedia)), save("ticker_text", tickerText),
       save("notice_text", notice), save("contact_phone", phone), save("site_name", site),
     ]);
     setSaving(false); toast.success(t("admin.settingsSaved"));
@@ -45,17 +46,19 @@ export default function AdminSettingsPage() {
 
   const clearImage = (setter: (v: string) => void, ref: React.RefObject<HTMLInputElement | null>) => () => { setter(""); if (ref.current) ref.current.value = ""; };
 
-  const addAdImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const addAdMedia = (type: "image" | "video") => (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 500 * 1024) { toast.error("Image too large (max 500KB)"); return; }
+    const maxSize = type === "video" ? 10 * 1024 * 1024 : 500 * 1024;
+    if (file.size > maxSize) { toast.error(type === "video" ? "Video too large (max 10MB)" : "Image too large (max 500KB)"); return; }
     const reader = new FileReader();
-    reader.onload = () => { setAdImages((prev) => [...prev, reader.result as string]); };
+    reader.onload = () => { setAdMedia((prev) => [...prev, { type, data: reader.result as string }]); };
     reader.readAsDataURL(file);
     if (adImageRef.current) adImageRef.current.value = "";
+    if (adVideoRef.current) adVideoRef.current.value = "";
   };
 
-  const removeAdImage = (idx: number) => setAdImages((prev) => prev.filter((_, i) => i !== idx));
+  const removeAdMedia = (idx: number) => setAdMedia((prev) => prev.filter((_, i) => i !== idx));
 
   if (loading) return <div className="flex items-center justify-center h-64"><Loader2 className="h-8 w-8 animate-spin text-gray-400" /></div>;
 
@@ -63,23 +66,34 @@ export default function AdminSettingsPage() {
     <div>
       <div className="flex items-center justify-between mb-6"><h1 className="text-xl font-bold text-gray-900">{t("admin.settingsTitle")}</h1><Button onClick={handleSave} disabled={saving}>{saving ? <><Loader2 size={16} className="mr-2 animate-spin" />{t("admin.saving")}</> : <><Save size={16} className="mr-2" />{t("admin.saveSettings")}</>}</Button></div>
       <div className="space-y-6">
-        {/* Ad Banner Images */}
+        {/* Ad Banner Media */}
         <Card><CardHeader><CardTitle className="flex items-center gap-2 text-base"><Image size={18} className="text-purple-500" />{t("admin.adImages")}</CardTitle><CardDescription>{t("admin.adImagesDesc")}</CardDescription></CardHeader><CardContent className="space-y-3">
-          {adImages.length > 0 && (
+          {adMedia.length > 0 && (
             <div className="flex flex-wrap gap-3">
-              {adImages.map((img, i) => (
-                <div key={i} className="relative w-32 h-20 rounded-lg overflow-hidden border">
-                  <img src={img} alt={`Ad ${i + 1}`} className="w-full h-full object-cover" />
-                  <button onClick={() => removeAdImage(i)} className="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"><X size={12} /></button>
+              {adMedia.map((item, i) => (
+                <div key={i} className="relative w-32 h-20 rounded-lg overflow-hidden border bg-black">
+                  {item.type === "video" ? (
+                    <video src={item.data} className="w-full h-full object-contain" muted />
+                  ) : (
+                    <img src={item.data} alt={`Ad ${i + 1}`} className="w-full h-full object-cover" />
+                  )}
+                  <span className={`absolute top-0.5 left-0.5 text-[9px] font-bold px-1 py-0.5 rounded text-white ${item.type === "video" ? "bg-blue-500" : "bg-green-500"}`}>
+                    {item.type === "video" ? "VID" : "IMG"}
+                  </span>
+                  <button onClick={() => removeAdMedia(i)} className="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600"><X size={12} /></button>
                 </div>
               ))}
             </div>
           )}
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button type="button" variant="outline" size="sm" onClick={() => adImageRef.current?.click()}>
-              <Plus size={14} className="mr-1" />{t("admin.adAddImage")}
+              <Image size={14} className="mr-1" />{t("admin.adAddImage")}
             </Button>
-            <input ref={adImageRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={addAdImage} className="hidden" />
+            <input ref={adImageRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={addAdMedia("image")} className="hidden" />
+            <Button type="button" variant="outline" size="sm" onClick={() => adVideoRef.current?.click()}>
+              <Video size={14} className="mr-1" />{t("admin.adAddVideo")}
+            </Button>
+            <input ref={adVideoRef} type="file" accept="video/mp4,video/webm" onChange={addAdMedia("video")} className="hidden" />
             <span className="text-xs text-gray-400 self-center">{t("admin.adImageHint")}</span>
           </div>
         </CardContent></Card>

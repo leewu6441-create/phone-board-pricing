@@ -1,78 +1,148 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { ChevronLeft, ChevronRight, Volume2, VolumeX } from "lucide-react";
+
+interface AdMedia {
+  type: "image" | "video";
+  data: string; // base64 data URL
+}
 
 interface AdBannerProps {
-  images: string[]; // base64 or URLs
+  media: AdMedia[];
   tickerText: string;
 }
 
-export function AdBanner({ images, tickerText }: AdBannerProps) {
+export function AdBanner({ media, tickerText }: AdBannerProps) {
   const [current, setCurrent] = useState(0);
-  const hasImages = images.length > 0;
+  const [muted, setMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const hasMedia = media.length > 0;
   const hasTicker = tickerText.trim().length > 0;
+  const currentItem = media[current];
 
-  // Auto-rotate images
+  // Auto-rotate (skip videos - they play to completion)
   useEffect(() => {
-    if (!hasImages || images.length <= 1) return;
+    if (!hasMedia || media.length <= 1) return;
+
+    if (currentItem?.type === "video") {
+      // Don't auto-rotate videos; they play once and we move on
+      const video = videoRef.current;
+      if (video) {
+        video.currentTime = 0;
+        video.play().catch(() => {});
+        const onEnded = () => {
+          setCurrent((prev) => (prev + 1) % media.length);
+        };
+        video.addEventListener("ended", onEnded);
+        return () => video.removeEventListener("ended", onEnded);
+      }
+    }
+
+    // Auto-rotate images every 4 seconds
     const timer = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % images.length);
+      setCurrent((prev) => (prev + 1) % media.length);
     }, 4000);
     return () => clearInterval(timer);
-  }, [hasImages, images.length]);
+  }, [hasMedia, media.length, current]);
+
+  // Play video when switching to a video item
+  useEffect(() => {
+    if (currentItem?.type === "video" && videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.play().catch(() => {});
+    }
+  }, [current, currentItem?.type]);
 
   const prev = useCallback(() => {
-    setCurrent((c) => (c === 0 ? images.length - 1 : c - 1));
-  }, [images.length]);
+    setCurrent((c) => (c === 0 ? media.length - 1 : c - 1));
+  }, [media.length]);
 
   const next = useCallback(() => {
-    setCurrent((c) => (c + 1) % images.length);
-  }, [images.length]);
+    setCurrent((c) => (c + 1) % media.length);
+  }, [media.length]);
 
-  if (!hasImages && !hasTicker) return null;
+  const toggleMute = () => setMuted((m) => !m);
+
+  if (!hasMedia && !hasTicker) return null;
 
   return (
     <div className="bg-white border-b border-gray-200">
-      {/* Image Carousel */}
-      {hasImages && (
-        <div className="relative w-full overflow-hidden" style={{ maxHeight: "320px" }}>
-          <div className="relative w-full" style={{ aspectRatio: "3/1", maxHeight: "320px" }}>
-            {images.map((img, i) => (
-              <img
-                key={i}
-                src={img}
-                alt={`Banner ${i + 1}`}
-                className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === current ? "opacity-100" : "opacity-0"}`}
-              />
-            ))}
+      {/* Media Carousel */}
+      {hasMedia && (
+        <div className="relative w-full overflow-hidden bg-black" style={{ maxHeight: "360px" }}>
+          <div className="relative w-full" style={{ aspectRatio: "3/1", maxHeight: "360px" }}>
+            {media.map((item, i) =>
+              item.type === "video" ? (
+                <video
+                  key={i}
+                  ref={i === current ? videoRef : undefined}
+                  src={item.data}
+                  muted={muted}
+                  loop={false}
+                  playsInline
+                  preload="metadata"
+                  className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ${i === current ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+                />
+              ) : (
+                <img
+                  key={i}
+                  src={item.data}
+                  alt={`Ad ${i + 1}`}
+                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === current ? "opacity-100" : "opacity-0"}`}
+                />
+              )
+            )}
           </div>
 
-          {images.length > 1 && (
+          {media.length > 1 && (
             <>
               <button
                 onClick={prev}
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/30 hover:bg-black/50 text-white rounded-full flex items-center justify-center transition-colors"
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition-colors z-10"
               >
                 <ChevronLeft size={18} />
               </button>
               <button
                 onClick={next}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/30 hover:bg-black/50 text-white rounded-full flex items-center justify-center transition-colors"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition-colors z-10"
               >
                 <ChevronRight size={18} />
               </button>
               {/* Dots */}
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                {images.map((_, i) => (
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+                {media.map((item, i) => (
                   <button
                     key={i}
                     onClick={() => setCurrent(i)}
-                    className={`w-2 h-2 rounded-full transition-all ${i === current ? "bg-white w-4" : "bg-white/50"}`}
+                    className={`rounded-full transition-all ${
+                      i === current
+                        ? "bg-white w-4 h-2"
+                        : item.type === "video"
+                        ? "bg-blue-400/60 w-2 h-2"
+                        : "bg-white/50 w-2 h-2"
+                    }`}
                   />
                 ))}
               </div>
             </>
+          )}
+
+          {/* Mute toggle for videos */}
+          {currentItem?.type === "video" && (
+            <button
+              onClick={toggleMute}
+              className="absolute bottom-3 right-3 w-7 h-7 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center z-10"
+            >
+              {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+            </button>
+          )}
+
+          {/* Video indicator */}
+          {currentItem?.type === "video" && (
+            <span className="absolute top-2 left-2 bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded z-10 uppercase tracking-wider">
+              VIDEO
+            </span>
           )}
         </div>
       )}
