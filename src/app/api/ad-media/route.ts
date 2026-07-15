@@ -26,10 +26,16 @@ export async function GET(request: NextRequest) {
 
     const data = typeof item === "string" ? item : item.data;
 
-    if (!data || !data.startsWith("data:")) {
+    // External URL — redirect
+    if (data.startsWith("http")) {
+      return NextResponse.redirect(data);
+    }
+
+    if (!data.startsWith("data:")) {
       return new NextResponse("Invalid", { status: 400 });
     }
 
+    // Base64 data URL
     const matches = data.match(/^data:([^;]+);base64,(.+)$/);
     if (!matches) return new NextResponse("Invalid format", { status: 400 });
 
