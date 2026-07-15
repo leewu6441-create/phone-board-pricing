@@ -17,9 +17,10 @@ interface FloatingContactProps {
   facebookLink: string;
   qrcodeImage: string;
   wechatId: string;
+  wechatQrcode: string;
 }
 
-export function FloatingContact({ zaloLink, facebookLink, qrcodeImage, wechatId }: FloatingContactProps) {
+export function FloatingContact({ zaloLink, facebookLink, qrcodeImage, wechatId, wechatQrcode }: FloatingContactProps) {
   const [expanded, setExpanded] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
   const [wechatOpen, setWechatOpen] = useState(false);
@@ -32,7 +33,6 @@ export function FloatingContact({ zaloLink, facebookLink, qrcodeImage, wechatId 
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // fallback
       const input = document.createElement("input");
       input.value = wechatId;
       document.body.appendChild(input);
@@ -43,6 +43,9 @@ export function FloatingContact({ zaloLink, facebookLink, qrcodeImage, wechatId 
       setTimeout(() => setCopied(false), 2000);
     }
   };
+
+  const showWechatBtn = wechatId || wechatQrcode;
+  const showZaloQrBtn = !!qrcodeImage;
 
   return (
     <>
@@ -55,7 +58,7 @@ export function FloatingContact({ zaloLink, facebookLink, qrcodeImage, wechatId 
               : "opacity-0 scale-75 translate-y-4 pointer-events-none"
           )}
         >
-          {qrcodeImage && (
+          {showZaloQrBtn && (
             <button
               onClick={() => { setQrOpen(true); setExpanded(false); }}
               className="flex items-center gap-2 bg-[#10B981] text-white px-4 py-2.5 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105"
@@ -66,7 +69,7 @@ export function FloatingContact({ zaloLink, facebookLink, qrcodeImage, wechatId 
             </button>
           )}
 
-          {wechatId && (
+          {showWechatBtn && (
             <button
               onClick={() => { setWechatOpen(true); setExpanded(false); }}
               className="flex items-center gap-2 bg-[#07C160] text-white px-4 py-2.5 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105"
@@ -112,7 +115,7 @@ export function FloatingContact({ zaloLink, facebookLink, qrcodeImage, wechatId 
         </button>
       </div>
 
-      {/* QR Code Dialog */}
+      {/* Zalo QR Code Dialog */}
       <Dialog open={qrOpen} onOpenChange={setQrOpen}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
@@ -135,20 +138,34 @@ export function FloatingContact({ zaloLink, facebookLink, qrcodeImage, wechatId 
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle>{t("contact.wechat")}</DialogTitle>
-            <DialogDescription>{t("contact.wechatId")}</DialogDescription>
+            <DialogDescription>{t("contact.scanQr")}</DialogDescription>
           </DialogHeader>
-          <div className="flex items-center justify-center p-4">
-            <div className="text-center space-y-4">
-              <MessageSquareText size={48} className="mx-auto text-[#07C160]" />
-              <p className="text-xl font-bold text-gray-900 font-mono tracking-wide">{wechatId}</p>
-              <button
-                onClick={handleCopyWechat}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-[#07C160] text-white rounded-lg hover:bg-[#06AD56] transition-colors"
-              >
-                {copied ? <Check size={18} /> : <Copy size={18} />}
-                <span>{copied ? t("contact.copied") : t("contact.copyWechat")}</span>
-              </button>
-            </div>
+          <div className="flex flex-col items-center gap-4 p-2">
+            {wechatQrcode ? (
+              <img
+                src={wechatQrcode}
+                alt="WeChat QR Code"
+                className="max-w-full h-auto rounded-lg"
+                style={{ maxHeight: "280px" }}
+              />
+            ) : (
+              <MessageSquareText size={64} className="text-[#07C160]" />
+            )}
+            {wechatId && (
+              <div className="text-center space-y-3 w-full">
+                <div className="flex items-center justify-center gap-2">
+                  <span className="text-sm text-gray-500">{t("contact.wechatId")}:</span>
+                  <span className="text-lg font-bold text-gray-900 font-mono tracking-wide">{wechatId}</span>
+                </div>
+                <button
+                  onClick={handleCopyWechat}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-[#07C160] text-white rounded-lg hover:bg-[#06AD56] transition-colors"
+                >
+                  {copied ? <Check size={18} /> : <Copy size={18} />}
+                  <span>{copied ? t("contact.copied") : t("contact.copyWechat")}</span>
+                </button>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>

@@ -139,5 +139,8 @@
   "admin.qrCodeUpload": "上传图片",
   "admin.wechatId": "微信号",
   "admin.wechatDesc": "您的微信号。例如：wxid_abc123",
+  "admin.wechatQrCode": "微信二维码",
+  "admin.wechatQrDesc": "上传微信二维码图片供客户扫描。",
+  "admin.wechatQrUpload": "上传图片",
   "admin.settingsSaved": "设置已保存"
 }

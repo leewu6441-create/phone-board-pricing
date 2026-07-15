@@ -20,6 +20,7 @@ export async function PublicLayout({ children }: PublicLayoutProps) {
         facebookLink={settings.facebook_link || "https://facebook.com/groups/your-group"}
         qrcodeImage={settings.qrcode_image || ""}
         wechatId={settings.wechat_id || ""}
+        wechatQrcode={settings.wechat_qrcode || ""}
       />
     </div>
   );

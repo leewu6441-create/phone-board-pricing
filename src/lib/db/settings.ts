@@ -1,11 +1,12 @@
 import { prisma } from "@/lib/prisma";
-import { DEFAULT_ZALO_LINK, DEFAULT_FACEBOOK_LINK, DEFAULT_QRCODE_IMAGE, DEFAULT_WECHAT_ID } from "@/lib/constants";
+import { DEFAULT_ZALO_LINK, DEFAULT_FACEBOOK_LINK, DEFAULT_QRCODE_IMAGE, DEFAULT_WECHAT_ID, DEFAULT_WECHAT_QRCODE } from "@/lib/constants";
 
 const defaults: Record<string, string> = {
   zalo_link: DEFAULT_ZALO_LINK,
   facebook_link: DEFAULT_FACEBOOK_LINK,
   qrcode_image: DEFAULT_QRCODE_IMAGE,
   wechat_id: DEFAULT_WECHAT_ID,
+  wechat_qrcode: DEFAULT_WECHAT_QRCODE,
   contact_phone: "",
   notice_text: "",
   site_name: "Bảng Giá Mainboard",

@@ -11,6 +11,8 @@ export const DEFAULT_QRCODE_IMAGE = "";
 
 export const DEFAULT_WECHAT_ID = "";
 
+export const DEFAULT_WECHAT_QRCODE = "";
+
 export const CATEGORIES = [
   { name: "Apple", slug: "apple", icon: "🍎" },
   { name: "Android", slug: "android", icon: "🤖" },

@@ -139,5 +139,8 @@
   "admin.qrCodeUpload": "Upload Image",
   "admin.wechatId": "WeChat ID",
   "admin.wechatDesc": "Your WeChat ID. e.g. wxid_abc123",
+  "admin.wechatQrCode": "WeChat QR Code",
+  "admin.wechatQrDesc": "Upload a QR code image for WeChat.",
+  "admin.wechatQrUpload": "Upload Image",
   "admin.settingsSaved": "Settings saved"
 }

@@ -139,5 +139,8 @@
   "admin.qrCodeUpload": "Tải ảnh lên",
   "admin.wechatId": "ID WeChat",
   "admin.wechatDesc": "ID WeChat của bạn. VD: wxid_abc123",
+  "admin.wechatQrCode": "Mã QR WeChat",
+  "admin.wechatQrDesc": "Tải lên ảnh mã QR WeChat để khách quét.",
+  "admin.wechatQrUpload": "Tải ảnh lên",
   "admin.settingsSaved": "Đã lưu cài đặt"
 }
