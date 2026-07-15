@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { formatPrice, formatVnd } from "@/lib/format";
 import { useTranslation } from "@/lib/i18n";
 import { convertVnd } from "@/lib/exchange";
-import { Plus, Trash2, Save, Check, X, Loader2 } from "lucide-react";
+import { Plus, Trash2, Save, Check, X, Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
 interface PriceData {
@@ -70,6 +70,12 @@ export default function AdminPricesPage() {
     if (res.ok) { toast.success(t("admin.priceSaved")); setPrices((prev) => prev.map((p) => (p.id === editingCell.id ? { ...p, ...u } : p))); }
     else toast.error(t("admin.priceSaveError"));
     setEditingCell(null);
+  };
+
+  const handleToggleActive = async (id: number, currentActive: boolean) => {
+    const res = await fetch("/api/admin/prices", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, is_active: !currentActive }) });
+    if (res.ok) { toast.success(currentActive ? t("admin.hidden") : t("admin.shown")); setPrices((prev) => prev.map((p) => (p.id === id ? { ...p, is_active: !currentActive } : p))); }
+    else toast.error(t("admin.error"));
   };
 
   const handleDelete = async (id: number, name: string) => {
@@ -160,7 +166,7 @@ export default function AdminPricesPage() {
               <tbody>{mprices.map((price, idx) => {
                 const cnyPrice = convertVnd(price.price_vnd, "CNY", { CNY: cnyRate, USD: 0.00004 });
                 return (
-                <tr key={price.id}><td className="text-gray-400 text-xs">{idx + 1}</td>
+                <tr key={price.id} className={price.is_active ? "" : "opacity-50 bg-gray-50"}><td className="text-gray-400 text-xs">{idx + 1}</td>
                   <td>{editableCell(price, "variant", price.variant)}</td>
                   {isAppleModel && <>
                     <td>{editableCell(price, "storage", price.storage || "-", "text-xs text-gray-500")}</td>
@@ -177,7 +183,14 @@ export default function AdminPricesPage() {
                       <span className="cursor-pointer text-gray-500 hover:underline text-xs" onClick={() => startEdit(price.id, "price_vnd", price.price_vnd.toString())}>{formatVnd(price.price_vnd)}</span>
                     )}
                   </td>
-                  <td className="text-center"><Button variant="ghost" size="icon" className="h-7 w-7 text-gray-400 hover:text-red-600" onClick={() => handleDelete(price.id, price.variant)}><Trash2 size={14} /></Button></td>
+                  <td className="text-center">
+                    <div className="flex items-center justify-center gap-0.5">
+                      <Button variant="ghost" size="icon" className={`h-7 w-7 ${price.is_active ? "text-gray-400 hover:text-yellow-600" : "text-yellow-500 hover:text-green-600"}`} onClick={() => handleToggleActive(price.id, price.is_active)} title={price.is_active ? t("admin.hide") : t("admin.show")}>
+                        {price.is_active ? <Eye size={14} /> : <EyeOff size={14} />}
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-gray-400 hover:text-red-600" onClick={() => handleDelete(price.id, price.variant)}><Trash2 size={14} /></Button>
+                    </div>
+                  </td>
                 </tr>
               )})}{mprices.length === 0 && <tr><td colSpan={isAppleModel ? 8 : 5} className="text-center text-gray-400 py-6">{t("admin.noData")}</td></tr>}</tbody></table>
               </div>

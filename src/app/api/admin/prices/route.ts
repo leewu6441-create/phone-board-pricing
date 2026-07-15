@@ -87,7 +87,7 @@ export async function PUT(request: NextRequest) {
   if (!session)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { id, price_vnd, variant, battery_info, storage, region_version, listing_type } = await request.json();
+  const { id, price_vnd, variant, battery_info, storage, region_version, listing_type, is_active } = await request.json();
 
   const current = await prisma.priceEntry.findUnique({
     where: { id },
@@ -105,6 +105,7 @@ export async function PUT(request: NextRequest) {
       ...(storage !== undefined && { storage: storage || null }),
       ...(region_version !== undefined && { regionVersion: region_version || null }),
       ...(listing_type !== undefined && { listingType: listing_type }),
+      ...(is_active !== undefined && { isActive: is_active }),
     },
   });
 
