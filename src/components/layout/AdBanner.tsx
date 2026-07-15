@@ -13,108 +13,105 @@ interface AdBannerProps {
   tickerText: string;
 }
 
-const IDLE_TIMEOUT = 10000; // 10 seconds before auto-play resumes
+const IDLE_TIMEOUT = 10000;
 
 export function AdBanner({ media, tickerText }: AdBannerProps) {
   const [current, setCurrent] = useState(0);
   const [muted, setMuted] = useState(true);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const autoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const userInteractedRef = useRef(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const userPausedRef = useRef(false);
   const hasMedia = media.length > 0;
   const hasTicker = tickerText.trim().length > 0;
   const currentItem = media[current];
+  const isVideo = currentItem?.type === "video";
 
-  // Stop current video
-  const stopVideo = useCallback(() => {
+  // Clear any pending timer
+  const clearTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  // Schedule next slide
+  const scheduleNext = useCallback(() => {
+    clearTimer();
+    timerRef.current = setTimeout(() => {
+      userPausedRef.current = false;
+      setCurrent((prev) => (prev + 1) % media.length);
+    }, IDLE_TIMEOUT);
+  }, [clearTimer, media.length]);
+
+  // Navigation: stop video immediately, pause auto-play
+  const goTo = useCallback((idx: number) => {
     if (videoRef.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
     }
-  }, []);
-
-  // Move to a specific slide
-  const goTo = useCallback(
-    (idx: number) => {
-      stopVideo();
-      userInteractedRef.current = true;
-      setCurrent(idx);
-    },
-    [stopVideo]
-  );
+    userPausedRef.current = true;
+    clearTimer();
+    setCurrent(idx);
+  }, [clearTimer]);
 
   const goNext = useCallback(() => {
-    stopVideo();
-    userInteractedRef.current = true;
+    if (videoRef.current) { videoRef.current.pause(); videoRef.current.currentTime = 0; }
+    userPausedRef.current = true;
+    clearTimer();
     setCurrent((c) => (c + 1) % media.length);
-  }, [stopVideo, media.length]);
+  }, [clearTimer, media.length]);
 
   const goPrev = useCallback(() => {
-    stopVideo();
-    userInteractedRef.current = true;
+    if (videoRef.current) { videoRef.current.pause(); videoRef.current.currentTime = 0; }
+    userPausedRef.current = true;
+    clearTimer();
     setCurrent((c) => (c === 0 ? media.length - 1 : c - 1));
-  }, [stopVideo, media.length]);
+  }, [clearTimer, media.length]);
 
-  const toggleMute = () => setMuted((m) => !m);
-
-  // Auto-play timer
+  // Main effect: handle video playback and auto-advance
   useEffect(() => {
     if (!hasMedia || media.length <= 1) return;
+    clearTimer();
 
-    // Clear any existing timer
-    if (autoTimerRef.current) {
-      clearTimeout(autoTimerRef.current);
-      autoTimerRef.current = null;
-    }
-
-    // If user just interacted, wait IDLE_TIMEOUT before resuming auto-play
-    if (userInteractedRef.current) {
-      autoTimerRef.current = setTimeout(() => {
-        userInteractedRef.current = false;
-        stopVideo();
+    // User paused → wait IDLE_TIMEOUT then resume
+    if (userPausedRef.current) {
+      timerRef.current = setTimeout(() => {
+        userPausedRef.current = false;
         setCurrent((prev) => (prev + 1) % media.length);
       }, IDLE_TIMEOUT);
-      return () => {
-        if (autoTimerRef.current) clearTimeout(autoTimerRef.current);
+      return () => clearTimer();
+    }
+
+    if (isVideo) {
+      // Retry getting the video element — ref may not be attached yet
+      const tryPlay = (attempts: number) => {
+        const video = videoRef.current;
+        if (video) {
+          video.currentTime = 0;
+          video.muted = muted;
+          const onEnded = () => setCurrent((prev) => (prev + 1) % media.length);
+          video.addEventListener("ended", onEnded, { once: true });
+          video.play().catch(() => {
+            // If autoplay blocked, still schedule next
+            scheduleNext();
+          });
+          return () => {
+            video.removeEventListener("ended", onEnded);
+            video.pause();
+          };
+        } else if (attempts > 0) {
+          // Ref not ready yet, retry next frame
+          const id = requestAnimationFrame(() => tryPlay(attempts - 1));
+          return () => cancelAnimationFrame(id);
+        }
       };
+      return tryPlay(10); // retry up to ~160ms
+    } else {
+      // Image: schedule auto-advance
+      scheduleNext();
+      return () => clearTimer();
     }
-
-    // For videos: play once, then advance
-    if (currentItem?.type === "video") {
-      const video = videoRef.current;
-      if (video) {
-        video.currentTime = 0;
-        video.play().catch(() => {});
-        const onEnded = () => {
-          stopVideo();
-          setCurrent((prev) => (prev + 1) % media.length);
-        };
-        video.addEventListener("ended", onEnded);
-        return () => {
-          video.removeEventListener("ended", onEnded);
-          video.pause();
-        };
-      }
-    }
-
-    // For images: auto-rotate after IDLE_TIMEOUT
-    autoTimerRef.current = setTimeout(() => {
-      stopVideo();
-      setCurrent((prev) => (prev + 1) % media.length);
-    }, IDLE_TIMEOUT);
-
-    return () => {
-      if (autoTimerRef.current) clearTimeout(autoTimerRef.current);
-    };
-  }, [hasMedia, media.length, current, currentItem?.type, stopVideo]);
-
-  // Play video when landing on a video item (only if user didn't interact)
-  useEffect(() => {
-    if (currentItem?.type === "video" && videoRef.current && !userInteractedRef.current) {
-      videoRef.current.currentTime = 0;
-      videoRef.current.play().catch(() => {});
-    }
-  }, [current, currentItem?.type]);
+  }, [current, isVideo, hasMedia, media.length, muted, clearTimer, scheduleNext]);
 
   if (!hasMedia && !hasTicker) return null;
 
@@ -128,13 +125,12 @@ export function AdBanner({ media, tickerText }: AdBannerProps) {
                 <video
                   key={i}
                   ref={i === current ? videoRef : undefined}
-                  src={item.data}
+                  src={i === current ? item.data : undefined}
                   muted={muted}
-                  loop={false}
                   playsInline
-                  preload="metadata"
+                  preload="auto"
                   className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ${
-                    i === current ? "opacity-100" : "opacity-0 pointer-events-none"
+                    i === current ? "opacity-100 z-10" : "opacity-0 pointer-events-none"
                   }`}
                 />
               ) : (
@@ -143,7 +139,7 @@ export function AdBanner({ media, tickerText }: AdBannerProps) {
                   src={item.data}
                   alt={`Ad ${i + 1}`}
                   className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
-                    i === current ? "opacity-100" : "opacity-0"
+                    i === current ? "opacity-100 z-10" : "opacity-0"
                   }`}
                 />
               )
@@ -152,29 +148,19 @@ export function AdBanner({ media, tickerText }: AdBannerProps) {
 
           {media.length > 1 && (
             <>
-              <button
-                onClick={goPrev}
-                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition-colors z-10"
-              >
+              <button onClick={goPrev} className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition-colors z-20">
                 <ChevronLeft size={18} />
               </button>
-              <button
-                onClick={goNext}
-                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition-colors z-10"
-              >
+              <button onClick={goNext} className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition-colors z-20">
                 <ChevronRight size={18} />
               </button>
-              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
                 {media.map((item, i) => (
                   <button
                     key={i}
                     onClick={() => goTo(i)}
                     className={`rounded-full transition-all ${
-                      i === current
-                        ? "bg-white w-4 h-2"
-                        : item.type === "video"
-                        ? "bg-blue-400/60 w-2 h-2"
-                        : "bg-white/50 w-2 h-2"
+                      i === current ? "bg-white w-4 h-2" : item.type === "video" ? "bg-blue-400/60 w-2 h-2" : "bg-white/50 w-2 h-2"
                     }`}
                   />
                 ))}
@@ -182,17 +168,12 @@ export function AdBanner({ media, tickerText }: AdBannerProps) {
             </>
           )}
 
-          {currentItem?.type === "video" && (
+          {isVideo && (
             <>
-              <button
-                onClick={toggleMute}
-                className="absolute bottom-3 right-3 w-7 h-7 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center z-10"
-              >
+              <button onClick={() => setMuted((m) => !m)} className="absolute bottom-3 right-3 w-7 h-7 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center z-20">
                 {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
               </button>
-              <span className="absolute top-2 left-2 bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded z-10 uppercase tracking-wider">
-                VIDEO
-              </span>
+              <span className="absolute top-2 left-2 bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded z-20 uppercase tracking-wider">VIDEO</span>
             </>
           )}
         </div>
@@ -201,14 +182,10 @@ export function AdBanner({ media, tickerText }: AdBannerProps) {
       {hasTicker && (
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white overflow-hidden">
           <div className="py-2.5 px-4 flex items-center gap-3">
-            <span className="text-xs font-bold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded shrink-0">
-              TIN TỨC
-            </span>
+            <span className="text-xs font-bold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded shrink-0">TIN TỨC</span>
             <div className="overflow-hidden flex-1 relative h-5">
               <div className="animate-marquee whitespace-nowrap absolute text-sm font-medium">
-                {tickerText}
-                <span className="inline-block w-16">&nbsp;</span>
-                {tickerText}
+                {tickerText}<span className="inline-block w-16">&nbsp;</span>{tickerText}
               </div>
             </div>
           </div>
