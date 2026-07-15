@@ -64,7 +64,7 @@ export function PriceListByCategory({ categorySlug, title, icon }: PriceListByCa
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-2xl font-bold">{title}</h2>
+                <h2 className="text-2xl font-bold">{title} <span className="text-orange-200 font-normal text-lg">{t("android.mainboard")}</span></h2>
                 <span className="bg-white text-orange-600 text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">{t("home.recycling")}</span>
               </div>
               <p className="text-orange-100 text-sm mt-0.5">{t("android.subtitle")}</p>
