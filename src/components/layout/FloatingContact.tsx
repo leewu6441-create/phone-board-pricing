@@ -47,11 +47,12 @@ export function FloatingContact({ facebookLink, wechatId, showWechat }: Floating
       <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
         <div
           className={cn(
-            "flex flex-col gap-3 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] origin-bottom",
+            "flex flex-col gap-3 transition-all duration-500 origin-bottom",
             expanded
               ? "opacity-100 scale-100 translate-y-0"
               : "opacity-0 scale-75 translate-y-4 pointer-events-none"
           )}
+          style={{ transitionTimingFunction: "cubic-bezier(0.34, 1.56, 0.64, 1)" }}
         >
           {/* Zalo QR Code — only contact method for Zalo */}
           <button
