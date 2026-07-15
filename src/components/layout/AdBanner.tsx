@@ -23,7 +23,7 @@ const transCache: Record<string, string> = {};
 export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, tickerText }: AdBannerProps) {
   const { lang } = useTranslation();
   const [current, setCurrent] = useState(0);
-  const [muted, setMuted] = useState(true);
+  const [muted, setMuted] = useState(false);
   const [displayTicker, setDisplayTicker] = useState(tickerText);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const setVideoRef = useCallback((el: HTMLVideoElement | null) => { videoRef.current = el; }, []);
@@ -99,7 +99,7 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
     if (isVideo) {
       const video = videoRef.current;
       if (video) {
-        video.muted = true;
+        video.muted = muted;
         video.currentTime = 0;
         const onEnded = () => setCurrent((prev) => (prev + 1) % mediaCount);
         video.addEventListener("ended", onEnded, { once: true });
