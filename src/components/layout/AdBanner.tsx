@@ -8,6 +8,7 @@ interface AdBannerProps {
   mediaCount: number;
   mediaTypes: ("image" | "video")[];
   mediaLinks: string[];
+  mediaSrcs: string[];
   tickerText: string;
 }
 
@@ -21,7 +22,7 @@ function isChinese(text: string): boolean {
 // Translation cache (client-side, per session)
 const transCache: Record<string, string> = {};
 
-export function AdBanner({ mediaCount, mediaTypes, mediaLinks, tickerText }: AdBannerProps) {
+export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, tickerText }: AdBannerProps) {
   const { lang } = useTranslation();
   const [current, setCurrent] = useState(0);
   const [muted, setMuted] = useState(true);
@@ -154,7 +155,7 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, tickerText }: AdB
       <div className="relative w-full" style={{ aspectRatio: "3/1", maxHeight: "360px" }}>
         <MediaItem
           type={mediaTypes[current]}
-          index={current}
+          src={mediaSrcs[current] || ""}
           isActive={true}
           muted={muted}
           setVideoRef={setVideoRef}
@@ -230,16 +231,14 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, tickerText }: AdB
 }
 
 function MediaItem({
-  type, index, isActive, muted, setVideoRef,
+  type, src, isActive, muted, setVideoRef,
 }: {
   type: "image" | "video";
-  index: number;
+  src: string;
   isActive: boolean;
   muted: boolean;
   setVideoRef: (el: HTMLVideoElement | null) => void;
 }) {
-  const src = `/api/ad-media?idx=${index}`;
-
   if (type === "video") {
     return (
       <video
@@ -259,7 +258,7 @@ function MediaItem({
   return (
     <img
       src={src}
-      alt={`Ad ${index + 1}`}
+      alt="Ad"
       className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
         isActive ? "opacity-100 z-10" : "opacity-0"
       }`}

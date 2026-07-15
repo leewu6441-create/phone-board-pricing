@@ -14,6 +14,7 @@ export async function PublicLayout({ children }: PublicLayoutProps) {
   let mediaCount = 0;
   let mediaTypes: ("image" | "video")[] = [];
   let mediaLinks: string[] = [];
+  let mediaSrcs: string[] = [];
   try {
     let raw = settings.ad_media;
     if (!raw || raw === "[]") raw = settings.ad_images || "";
@@ -23,6 +24,14 @@ export async function PublicLayout({ children }: PublicLayoutProps) {
         mediaCount = parsed.length;
         mediaTypes = parsed.map((item: any) => (typeof item === "string" ? "image" : item.type || "image"));
         mediaLinks = parsed.map((item: any) => (typeof item === "string" ? "" : item.link || ""));
+        mediaSrcs = parsed.map((item: any, i: number) => {
+          const data = typeof item === "string" ? item : item.data;
+          const type = typeof item === "string" ? "image" : item.type || "image";
+          // For external video URLs, pass directly (no API proxy needed)
+          if (type === "video" && data.startsWith("http")) return data;
+          // For base64 images/videos, use API endpoint
+          return `/api/ad-media?idx=${i}`;
+        });
       }
     }
   } catch { /* empty */ }
@@ -34,6 +43,7 @@ export async function PublicLayout({ children }: PublicLayoutProps) {
         mediaCount={mediaCount}
         mediaTypes={mediaTypes}
         mediaLinks={mediaLinks}
+        mediaSrcs={mediaSrcs}
         tickerText={settings.ticker_text || ""}
       />
       <main className="flex-1">{children}</main>
