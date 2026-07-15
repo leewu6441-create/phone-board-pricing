@@ -8,7 +8,7 @@ export async function GET(
   { params }: { params: { idx: string } }
 ) {
   const idx = parseInt(params.idx.replace(/\..*$/, ""));
-  if (isNaN(idx)) return new NextResponse("Invalid index", { status: 400 });
+  if (isNaN(idx)) return new NextResponse("Invalid", { status: 400 });
 
   const setting = await prisma.siteSetting.findFirst({
     where: { key: { in: ["ad_media", "ad_images"] } },
@@ -30,11 +30,25 @@ export async function GET(
       return NextResponse.redirect(data);
     }
 
-    // Return the raw data URL as text
-    return new NextResponse(data, {
+    if (!data.startsWith("data:")) {
+      return new NextResponse("Invalid", { status: 400 });
+    }
+
+    const comma = data.indexOf(",");
+    const header = data.substring(0, comma);
+    const base64 = data.substring(comma + 1);
+    const mimeMatch = header.match(/data:([^;]+)/);
+    const mimeType = mimeMatch ? mimeMatch[1] : "application/octet-stream";
+    const buffer = Buffer.from(base64, "base64");
+
+    // For images: return binary directly so <img> tags work
+    // For videos: return binary (video elements handle it)
+    return new NextResponse(buffer, {
       headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Cache-Control": "public, max-age=86400",
+        "Content-Type": mimeType,
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Accept-Ranges": "bytes",
+        "Content-Length": buffer.length.toString(),
       },
     });
   } catch {

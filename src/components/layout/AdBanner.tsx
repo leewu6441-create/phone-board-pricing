@@ -21,24 +21,20 @@ function isChinese(text: string): boolean {
 
 const transCache: Record<string, string> = {};
 
-// Cache for fetched data URLs
-const dataUrlCache: Record<string, string> = {};
+// Cache for fetched blob URLs (video only)
+const blobCache: Record<string, string> = {};
 
-// Fetch data URL from API
-async function getDataUrl(src: string): Promise<string> {
-  if (dataUrlCache[src]) return dataUrlCache[src];
+async function getVideoBlobUrl(src: string): Promise<string> {
+  if (blobCache[src]) return blobCache[src];
   if (!src.startsWith("/api/ad-media/")) return src;
-
   try {
     const res = await fetch(src);
     if (res.redirected) return res.url;
     if (!res.ok) return src;
-    const text = await res.text();
-    if (text.startsWith("data:")) {
-      dataUrlCache[src] = text;
-      return text;
-    }
-    return src;
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    blobCache[src] = url;
+    return url;
   } catch {
     return src;
   }
@@ -75,13 +71,13 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
       .catch(() => setDisplayTicker(tickerText));
   }, [tickerText, lang]);
 
-  // Fetch data URL for video
+  // Fetch video blob URL
   useEffect(() => {
     if (!hasMedia) return;
     const src = mediaSrcs[current] || "";
-    if (isVideo && src.startsWith("/api/ad-media/")) {
-      getDataUrl(src).then(setVideoDataUrl);
-    } else if (!isVideo) {
+    if (isVideo) {
+      getVideoBlobUrl(src).then(setVideoDataUrl);
+    } else {
       setVideoDataUrl("");
     }
   }, [current, isVideo, hasMedia, mediaSrcs]);
