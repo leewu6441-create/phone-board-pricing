@@ -11,29 +11,27 @@ interface PublicLayoutProps {
 export async function PublicLayout({ children }: PublicLayoutProps) {
   const settings = await getAllSettings();
 
-  let adMedia: { type: "image" | "video"; data: string }[] = [];
+  // Count media items without passing their data through props
+  let mediaCount = 0;
+  let mediaTypes: ("image" | "video")[] = [];
   try {
-    // Try new format first, fall back to old ad_images key
     let raw = settings.ad_media;
-    if (!raw || raw === "[]") {
-      raw = settings.ad_images || "";
-    }
+    if (!raw || raw === "[]") raw = settings.ad_images || "";
     if (raw && raw !== "[]") {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        adMedia = parsed.map((item: any) =>
-          typeof item === "string" ? { type: "image", data: item } : item
+      if (Array.isArray(parsed)) {
+        mediaCount = parsed.length;
+        mediaTypes = parsed.map((item: any) =>
+          typeof item === "string" ? "image" : item.type || "image"
         );
       }
     }
-  } catch {
-    adMedia = [];
-  }
+  } catch { /* empty */ }
 
   return (
     <div className="flex flex-col min-h-screen">
       <PublicHeader />
-      <AdBanner media={adMedia} tickerText={settings.ticker_text || ""} />
+      <AdBanner mediaCount={mediaCount} mediaTypes={mediaTypes} tickerText={settings.ticker_text || ""} />
       <main className="flex-1">{children}</main>
       <PublicFooter />
       <FloatingContact

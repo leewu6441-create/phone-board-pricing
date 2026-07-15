@@ -3,52 +3,32 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ChevronLeft, ChevronRight, Volume2, VolumeX } from "lucide-react";
 
-interface AdMedia {
-  type: "image" | "video";
-  data: string;
-}
-
 interface AdBannerProps {
-  media: AdMedia[];
+  mediaCount: number;
+  mediaTypes: ("image" | "video")[];
   tickerText: string;
 }
 
 const IDLE_TIMEOUT = 10000;
 
-export function AdBanner({ media, tickerText }: AdBannerProps) {
+export function AdBanner({ mediaCount, mediaTypes, tickerText }: AdBannerProps) {
   const [current, setCurrent] = useState(0);
   const [muted, setMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const setVideoRef = useCallback((el: HTMLVideoElement | null) => { videoRef.current = el; }, []);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const userPausedRef = useRef(false);
-  const hasMedia = media.length > 0;
+  const hasMedia = mediaCount > 0;
   const hasTicker = tickerText.trim().length > 0;
-  const currentItem = media[current];
-  const isVideo = currentItem?.type === "video";
+  const isVideo = mediaTypes[current] === "video";
 
-  // Clear any pending timer
   const clearTimer = useCallback(() => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
+    if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
   }, []);
 
-  // Schedule next slide
-  const scheduleNext = useCallback(() => {
-    clearTimer();
-    timerRef.current = setTimeout(() => {
-      userPausedRef.current = false;
-      setCurrent((prev) => (prev + 1) % media.length);
-    }, IDLE_TIMEOUT);
-  }, [clearTimer, media.length]);
-
-  // Navigation: stop video immediately, pause auto-play
+  // Navigation
   const goTo = useCallback((idx: number) => {
-    if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
-    }
+    if (videoRef.current) { videoRef.current.pause(); videoRef.current.currentTime = 0; }
     userPausedRef.current = true;
     clearTimer();
     setCurrent(idx);
@@ -58,60 +38,62 @@ export function AdBanner({ media, tickerText }: AdBannerProps) {
     if (videoRef.current) { videoRef.current.pause(); videoRef.current.currentTime = 0; }
     userPausedRef.current = true;
     clearTimer();
-    setCurrent((c) => (c + 1) % media.length);
-  }, [clearTimer, media.length]);
+    setCurrent((c) => (c + 1) % mediaCount);
+  }, [clearTimer, mediaCount]);
 
   const goPrev = useCallback(() => {
     if (videoRef.current) { videoRef.current.pause(); videoRef.current.currentTime = 0; }
     userPausedRef.current = true;
     clearTimer();
-    setCurrent((c) => (c === 0 ? media.length - 1 : c - 1));
-  }, [clearTimer, media.length]);
+    setCurrent((c) => (c === 0 ? mediaCount - 1 : c - 1));
+  }, [clearTimer, mediaCount]);
 
-  // Main effect: handle video playback and auto-advance
+  // Main effect: video play + auto-advance
   useEffect(() => {
-    if (!hasMedia || media.length <= 1) return;
+    if (!hasMedia || mediaCount <= 1) return;
     clearTimer();
 
-    // User paused → wait IDLE_TIMEOUT then resume
     if (userPausedRef.current) {
       timerRef.current = setTimeout(() => {
         userPausedRef.current = false;
-        setCurrent((prev) => (prev + 1) % media.length);
+        setCurrent((prev) => (prev + 1) % mediaCount);
       }, IDLE_TIMEOUT);
       return () => clearTimer();
     }
 
     if (isVideo) {
-      // Retry getting the video element — ref may not be attached yet
       const tryPlay = (attempts: number) => {
         const video = videoRef.current;
         if (video) {
           video.currentTime = 0;
           video.muted = muted;
-          const onEnded = () => setCurrent((prev) => (prev + 1) % media.length);
+          const onEnded = () => setCurrent((prev) => (prev + 1) % mediaCount);
           video.addEventListener("ended", onEnded, { once: true });
           video.play().catch(() => {
-            // If autoplay blocked, still schedule next
-            scheduleNext();
+            // Autoplay blocked, fallback: schedule next
+            clearTimer();
+            timerRef.current = setTimeout(() => {
+              setCurrent((prev) => (prev + 1) % mediaCount);
+            }, IDLE_TIMEOUT);
           });
           return () => {
             video.removeEventListener("ended", onEnded);
             video.pause();
           };
         } else if (attempts > 0) {
-          // Ref not ready yet, retry next frame
           const id = requestAnimationFrame(() => tryPlay(attempts - 1));
           return () => cancelAnimationFrame(id);
         }
       };
-      return tryPlay(10); // retry up to ~160ms
+      return tryPlay(15);
     } else {
       // Image: schedule auto-advance
-      scheduleNext();
+      timerRef.current = setTimeout(() => {
+        setCurrent((prev) => (prev + 1) % mediaCount);
+      }, IDLE_TIMEOUT);
       return () => clearTimer();
     }
-  }, [current, isVideo, hasMedia, media.length, muted, clearTimer, scheduleNext]);
+  }, [current, isVideo, hasMedia, mediaCount, muted, clearTimer]);
 
   if (!hasMedia && !hasTicker) return null;
 
@@ -120,33 +102,17 @@ export function AdBanner({ media, tickerText }: AdBannerProps) {
       {hasMedia && (
         <div className="relative w-full overflow-hidden bg-black" style={{ maxHeight: "360px" }}>
           <div className="relative w-full" style={{ aspectRatio: "3/1", maxHeight: "360px" }}>
-            {media.map((item, i) =>
-              item.type === "video" ? (
-                <video
-                  key={i}
-                  ref={i === current ? videoRef : undefined}
-                  src={i === current ? item.data : undefined}
-                  muted={muted}
-                  playsInline
-                  preload="auto"
-                  className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ${
-                    i === current ? "opacity-100 z-10" : "opacity-0 pointer-events-none"
-                  }`}
-                />
-              ) : (
-                <img
-                  key={i}
-                  src={item.data}
-                  alt={`Ad ${i + 1}`}
-                  className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
-                    i === current ? "opacity-100 z-10" : "opacity-0"
-                  }`}
-                />
-              )
-            )}
+            {/* Only render the current item to avoid loading all media at once */}
+            <MediaItem
+              type={mediaTypes[current]}
+              index={current}
+              isActive={true}
+              muted={muted}
+              setVideoRef={setVideoRef}
+            />
           </div>
 
-          {media.length > 1 && (
+          {mediaCount > 1 && (
             <>
               <button onClick={goPrev} className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-black/40 hover:bg-black/60 text-white rounded-full flex items-center justify-center transition-colors z-20">
                 <ChevronLeft size={18} />
@@ -155,12 +121,12 @@ export function AdBanner({ media, tickerText }: AdBannerProps) {
                 <ChevronRight size={18} />
               </button>
               <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
-                {media.map((item, i) => (
+                {mediaTypes.map((type, i) => (
                   <button
                     key={i}
                     onClick={() => goTo(i)}
                     className={`rounded-full transition-all ${
-                      i === current ? "bg-white w-4 h-2" : item.type === "video" ? "bg-blue-400/60 w-2 h-2" : "bg-white/50 w-2 h-2"
+                      i === current ? "bg-white w-4 h-2" : type === "video" ? "bg-blue-400/60 w-2 h-2" : "bg-white/50 w-2 h-2"
                     }`}
                   />
                 ))}
@@ -192,5 +158,47 @@ export function AdBanner({ media, tickerText }: AdBannerProps) {
         </div>
       )}
     </div>
+  );
+}
+
+// Render a single media item via API
+function MediaItem({
+  type,
+  index,
+  isActive,
+  muted,
+  setVideoRef,
+}: {
+  type: "image" | "video";
+  index: number;
+  isActive: boolean;
+  muted: boolean;
+  setVideoRef: (el: HTMLVideoElement | null) => void;
+}) {
+  const src = `/api/ad-media?idx=${index}`;
+
+  if (type === "video") {
+    return (
+      <video
+        ref={isActive ? setVideoRef : undefined}
+        src={isActive ? src : undefined}
+        muted={muted}
+        playsInline
+        preload="auto"
+        className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ${
+          isActive ? "opacity-100 z-10" : "opacity-0 pointer-events-none"
+        }`}
+      />
+    );
+  }
+
+  return (
+    <img
+      src={src}
+      alt={`Ad ${index + 1}`}
+      className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${
+        isActive ? "opacity-100 z-10" : "opacity-0"
+      }`}
+    />
   );
 }
