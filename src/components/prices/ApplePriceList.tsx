@@ -57,16 +57,26 @@ export function ApplePriceList() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            <svg viewBox="0 0 24 24" className="h-7 w-7 text-gray-900" fill="currentColor">
+      {/* Selling Banner */}
+      <div className="bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl p-5 text-white shadow-lg">
+        <div className="flex items-center gap-3">
+          <div className="bg-white/20 rounded-full p-2.5">
+            <svg viewBox="0 0 24 24" className="h-8 w-8" fill="currentColor">
               <path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 21.99 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.1 21.99C7.79 22.03 6.8 20.68 5.96 19.47C4.25 16.97 2.94 12.45 4.7 9.39C5.57 7.87 7.13 6.91 8.82 6.88C10.1 6.86 11.32 7.75 12.11 7.75C12.89 7.75 14.37 6.68 15.92 6.84C16.57 6.87 18.39 7.1 19.56 8.82C19.47 8.88 17.39 10.1 17.41 12.63C17.44 15.65 20.06 16.66 20.09 16.67C20.06 16.74 19.67 18.11 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.94 2C16.07 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.07 6.7 11.95 6.61C11.8 5.46 12.24 4.34 13 3.5Z"/>
             </svg>
-            {t("apple.title")}
-          </h2>
-          <DateDisplay date={new Date()} label={t("price.updated")} className="mt-1" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-2xl font-bold">{t("apple.title")}</h2>
+              <span className="bg-white text-green-600 text-xs font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">{t("home.selling")}</span>
+            </div>
+            <p className="text-green-100 text-sm mt-0.5">{t("apple.subtitle")}</p>
+          </div>
         </div>
+      </div>
+
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <DateDisplay date={new Date()} label={t("price.updated")} className="mt-1" />
         <div className="relative w-full sm:w-64">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input placeholder={t("price.filterByName")} value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
@@ -111,13 +121,13 @@ export function ApplePriceList() {
                 )}
               </div>
 
-              {/* Price */}
-              <div className="border-t border-gray-100 px-4 py-3 bg-green-50/50 flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-green-700 text-xs font-medium">
-                  <Tag size={13} />
-                  <span>{t("apple.salePrice")}</span>
+              {/* Price — prominent sale display */}
+              <div className="border-t border-green-200 px-4 py-3.5 bg-green-50 flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <Tag size={14} className="text-green-600" />
+                  <span className="text-green-700 font-bold text-sm uppercase tracking-wide">{t("apple.salePrice")}</span>
                 </div>
-                <VndPrice amount={p.price_vnd} className="text-lg" />
+                <VndPrice amount={p.price_vnd} className="text-xl" />
               </div>
             </Card>
           ))}

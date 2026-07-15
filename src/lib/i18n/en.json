@@ -7,7 +7,9 @@
 
   "home.title": "Vertex Price List Today",
   "home.updatedDate": "Updated",
-  "home.appleModels": "{{count}} models",
+  "home.selling": "For Sale",
+  "home.recycling": "Buying",
+  "home.appleModels": "{{count}} phones",
   "home.androidModels": "{{count}} models",
   "home.viewDetail": "View details",
   "home.searchPlaceholder": "Search by phone name, model...",
@@ -26,11 +28,14 @@
   "search.categoryApple": "Apple",
   "search.categoryAndroid": "Android",
 
-  "apple.title": "iPhone - Sales Price List",
+  "apple.title": "iPhone For Sale",
+  "apple.subtitle": "In stock - Genuine phones with full specs",
   "apple.salePrice": "Price",
   "apple.storage": "Storage",
   "apple.battery": "Battery",
   "apple.region": "Region",
+
+  "android.subtitle": "Motherboard buyback - Prices updated daily",
 
   "price.expandAll": "Expand all",
   "price.filterByName": "Filter by name, brand...",

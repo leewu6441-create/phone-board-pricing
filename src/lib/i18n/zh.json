@@ -7,7 +7,9 @@
 
   "home.title": "今日主板报价",
   "home.updatedDate": "更新日期",
-  "home.appleModels": "{{count}} 个型号",
+  "home.selling": "出售",
+  "home.recycling": "回收",
+  "home.appleModels": "{{count}} 台手机",
   "home.androidModels": "{{count}} 个型号",
   "home.viewDetail": "查看详情",
   "home.searchPlaceholder": "搜索手机型号...",
@@ -26,11 +28,14 @@
   "search.categoryApple": "苹果",
   "search.categoryAndroid": "安卓",
 
-  "apple.title": "iPhone - 销售报价",
+  "apple.title": "iPhone 出售",
+  "apple.subtitle": "现货供应 - 正品手机，信息齐全",
   "apple.salePrice": "售价",
   "apple.storage": "存储",
   "apple.battery": "电池",
   "apple.region": "地区",
+
+  "android.subtitle": "主板回收 - 每日更新回收价格",
 
   "price.expandAll": "展开全部",
   "price.filterByName": "按名称、品牌筛选...",

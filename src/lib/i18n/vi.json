@@ -7,7 +7,9 @@
 
   "home.title": "Bảng Giá Vertex Hôm Nay",
   "home.updatedDate": "Cập nhật ngày",
-  "home.appleModels": "{{count}} mẫu mã",
+  "home.selling": "Bán",
+  "home.recycling": "Thu Mua",
+  "home.appleModels": "{{count}} máy",
   "home.androidModels": "{{count}} mẫu mã",
   "home.viewDetail": "Xem chi tiết",
   "home.searchPlaceholder": "Tìm kiếm theo tên máy, model...",
@@ -26,11 +28,14 @@
   "search.categoryApple": "Apple",
   "search.categoryAndroid": "Android",
 
-  "apple.title": "iPhone - Bảng Giá Bán",
+  "apple.title": "iPhone Để Bán",
+  "apple.subtitle": "Hàng có sẵn - Máy chính hãng đầy đủ thông tin",
   "apple.salePrice": "Giá bán",
   "apple.storage": "Bộ nhớ",
   "apple.battery": "Pin",
   "apple.region": "Khu vực",
+
+  "android.subtitle": "Thu mua mainboard - Giá thu mua cập nhật mỗi ngày",
 
   "price.expandAll": "Mở tất cả",
   "price.filterByName": "Tìm theo tên máy, hãng...",

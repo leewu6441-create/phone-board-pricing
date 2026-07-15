@@ -46,25 +46,34 @@ export function HomeClient({ prices, noticeText }: HomeClientProps) {
       )}
 
       <div className="grid grid-cols-2 gap-4">
+        {/* Apple — BÁN / SALE */}
         <Link href="/apple">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer border-2 border-transparent hover:border-gray-300">
+          <Card className="hover:shadow-lg transition-all cursor-pointer border-2 border-green-400 hover:border-green-500 bg-gradient-to-b from-green-50 to-white overflow-hidden">
+            <div className="bg-green-500 text-white text-[10px] font-bold uppercase tracking-widest text-center py-1">
+              {t("home.selling")}
+            </div>
             <CardContent className="p-5 text-center">
-              <svg viewBox="0 0 24 24" className="mx-auto h-10 w-10 text-gray-900 mb-2" fill="currentColor"><path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 21.99 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.1 21.99C7.79 22.03 6.8 20.68 5.96 19.47C4.25 16.97 2.94 12.45 4.7 9.39C5.57 7.87 7.13 6.91 8.82 6.88C10.1 6.86 11.32 7.75 12.11 7.75C12.89 7.75 14.37 6.68 15.92 6.84C16.57 6.87 18.39 7.1 19.56 8.82C19.47 8.88 17.39 10.1 17.41 12.63C17.44 15.65 20.06 16.66 20.09 16.67C20.06 16.74 19.67 18.11 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.94 2C16.07 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.07 6.7 11.95 6.61C11.8 5.46 12.24 4.34 13 3.5Z"/></svg>
-              <h3 className="text-lg font-bold text-gray-900">Apple</h3>
-              <p className="text-sm text-gray-500 mt-1">{t("home.appleModels", { count: applePrices.length })}</p>
-              <div className="mt-3 flex items-center justify-center gap-1 text-primary-600 text-sm font-medium">
+              <svg viewBox="0 0 24 24" className="mx-auto h-12 w-12 text-gray-900 mb-2" fill="currentColor"><path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 21.99 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.1 21.99C7.79 22.03 6.8 20.68 5.96 19.47C4.25 16.97 2.94 12.45 4.7 9.39C5.57 7.87 7.13 6.91 8.82 6.88C10.1 6.86 11.32 7.75 12.11 7.75C12.89 7.75 14.37 6.68 15.92 6.84C16.57 6.87 18.39 7.1 19.56 8.82C19.47 8.88 17.39 10.1 17.41 12.63C17.44 15.65 20.06 16.66 20.09 16.67C20.06 16.74 19.67 18.11 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.94 2C16.07 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.07 6.7 11.95 6.61C11.8 5.46 12.24 4.34 13 3.5Z"/></svg>
+              <h3 className="text-lg font-bold text-gray-900">iPhone</h3>
+              <p className="text-xs text-green-600 font-medium mt-1">{t("home.appleModels", { count: applePrices.length })}</p>
+              <div className="mt-3 inline-flex items-center gap-1 px-3 py-1.5 bg-green-500 text-white text-sm font-medium rounded-full hover:bg-green-600 transition-colors">
                 {t("home.viewDetail")} <ArrowRight size={14} />
               </div>
             </CardContent>
           </Card>
         </Link>
+
+        {/* Android — THU MUA / RECYCLE */}
         <Link href="/android">
-          <Card className="hover:shadow-md transition-shadow cursor-pointer border-2 border-transparent hover:border-green-300">
+          <Card className="hover:shadow-lg transition-all cursor-pointer border-2 border-orange-400 hover:border-orange-500 bg-gradient-to-b from-orange-50 to-white overflow-hidden">
+            <div className="bg-orange-500 text-white text-[10px] font-bold uppercase tracking-widest text-center py-1">
+              {t("home.recycling")}
+            </div>
             <CardContent className="p-5 text-center">
-              <svg viewBox="0 0 24 24" className="mx-auto h-10 w-10 text-green-600 mb-2" fill="currentColor"><path d="M6,18c0,0.55 0.45,1 1,1h1v3.5c0,0.83 0.67,1.5 1.5,1.5s1.5,-0.67 1.5,-1.5V19h2v3.5c0,0.83 0.67,1.5 1.5,1.5s1.5,-0.67 1.5,-1.5V19h1c0.55,0 1,-0.45 1,-1V8H6V18ZM3.5,8C2.67,8 2,8.67 2,9.5v7c0,0.83 0.67,1.5 1.5,1.5S5,17.33 5,16.5v-7C5,8.67 4.33,8 3.5,8ZM20.5,8c-0.83,0 -1.5,0.67 -1.5,1.5v7c0,0.83 0.67,1.5 1.5,1.5s1.5,-0.67 1.5,-1.5v-7c0,-0.83 -0.67,-1.5 -1.5,-1.5ZM15.53,2.16l1.3,-1.3c0.2,-0.2 0.2,-0.51 0,-0.71c-0.2,-0.2 -0.51,-0.2 -0.71,0l-1.48,1.48C13.85,1.23 12.95,1 12,1c-0.96,0 -1.86,0.23 -2.66,0.63L7.85,0.15c-0.2,-0.2 -0.51,-0.2 -0.71,0c-0.2,0.2 -0.2,0.51 0,0.71l1.3,1.3C6.97,3.26 6,5.01 6,7h12c0,-1.99 -0.97,-3.75 -2.47,-4.84Z"/></svg>
+              <svg viewBox="0 0 24 24" className="mx-auto h-12 w-12 text-green-700 mb-2" fill="currentColor"><path d="M6,18c0,0.55 0.45,1 1,1h1v3.5c0,0.83 0.67,1.5 1.5,1.5s1.5,-0.67 1.5,-1.5V19h2v3.5c0,0.83 0.67,1.5 1.5,1.5s1.5,-0.67 1.5,-1.5V19h1c0.55,0 1,-0.45 1,-1V8H6V18ZM3.5,8C2.67,8 2,8.67 2,9.5v7c0,0.83 0.67,1.5 1.5,1.5S5,17.33 5,16.5v-7C5,8.67 4.33,8 3.5,8ZM20.5,8c-0.83,0 -1.5,0.67 -1.5,1.5v7c0,0.83 0.67,1.5 1.5,1.5s1.5,-0.67 1.5,-1.5v-7c0,-0.83 -0.67,-1.5 -1.5,-1.5ZM15.53,2.16l1.3,-1.3c0.2,-0.2 0.2,-0.51 0,-0.71c-0.2,-0.2 -0.51,-0.2 -0.71,0l-1.48,1.48C13.85,1.23 12.95,1 12,1c-0.96,0 -1.86,0.23 -2.66,0.63L7.85,0.15c-0.2,-0.2 -0.51,-0.2 -0.71,0c-0.2,0.2 -0.2,0.51 0,0.71l1.3,1.3C6.97,3.26 6,5.01 6,7h12c0,-1.99 -0.97,-3.75 -2.47,-4.84Z"/></svg>
               <h3 className="text-lg font-bold text-gray-900">Android</h3>
-              <p className="text-sm text-gray-500 mt-1">{t("home.androidModels", { count: androidPrices.length })}</p>
-              <div className="mt-3 flex items-center justify-center gap-1 text-primary-600 text-sm font-medium">
+              <p className="text-xs text-orange-600 font-medium mt-1">{t("home.androidModels", { count: androidPrices.length })}</p>
+              <div className="mt-3 inline-flex items-center gap-1 px-3 py-1.5 bg-orange-500 text-white text-sm font-medium rounded-full hover:bg-orange-600 transition-colors">
                 {t("home.viewDetail")} <ArrowRight size={14} />
               </div>
             </CardContent>
@@ -96,8 +105,11 @@ export function HomeClient({ prices, noticeText }: HomeClientProps) {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-0.5">
                       <span className="text-xs px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 font-medium">{price.brand_name}</span>
-                      <span className="text-xs px-1.5 py-0.5 rounded bg-primary-50 text-primary-700 font-medium">
-                        {price.category_slug === "apple" ? "🍎" : "🤖"}
+                      <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${price.category_slug === "apple" ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"}`}>
+                        {price.category_slug === "apple"
+                          ? <span className="flex items-center gap-0.5"><svg viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor"><path d="M18.71 19.5C17.88 20.74 17 21.95 15.66 21.97C14.32 21.99 13.89 21.18 12.37 21.18C10.84 21.18 10.37 21.95 9.1 21.99C7.79 22.03 6.8 20.68 5.96 19.47C4.25 16.97 2.94 12.45 4.7 9.39C5.57 7.87 7.13 6.91 8.82 6.88C10.1 6.86 11.32 7.75 12.11 7.75C12.89 7.75 14.37 6.68 15.92 6.84C16.57 6.87 18.39 7.1 19.56 8.82C19.47 8.88 17.39 10.1 17.41 12.63C17.44 15.65 20.06 16.66 20.09 16.67C20.06 16.74 19.67 18.11 18.71 19.5ZM13 3.5C13.73 2.67 14.94 2.04 15.94 2C16.07 3.17 15.6 4.35 14.9 5.19C14.21 6.04 13.07 6.7 11.95 6.61C11.8 5.46 12.24 4.34 13 3.5Z"/></svg> {t("home.selling")}</span>
+                          : <span className="flex items-center gap-0.5"><svg viewBox="0 0 24 24" className="h-3 w-3" fill="currentColor"><path d="M6,18c0,0.55 0.45,1 1,1h1v3.5c0,0.83 0.67,1.5 1.5,1.5s1.5,-0.67 1.5,-1.5V19h2v3.5c0,0.83 0.67,1.5 1.5,1.5s1.5,-0.67 1.5,-1.5V19h1c0.55,0 1,-0.45 1,-1V8H6V18ZM3.5,8C2.67,8 2,8.67 2,9.5v7c0,0.83 0.67,1.5 1.5,1.5S5,17.33 5,16.5v-7C5,8.67 4.33,8 3.5,8ZM20.5,8c-0.83,0 -1.5,0.67 -1.5,1.5v7c0,0.83 0.67,1.5 1.5,1.5s1.5,-0.67 1.5,-1.5v-7c0,-0.83 -0.67,-1.5 -1.5,-1.5ZM15.53,2.16l1.3,-1.3c0.2,-0.2 0.2,-0.51 0,-0.71c-0.2,-0.2 -0.51,-0.2 -0.71,0l-1.48,1.48C13.85,1.23 12.95,1 12,1c-0.96,0 -1.86,0.23 -2.66,0.63L7.85,0.15c-0.2,-0.2 -0.51,-0.2 -0.71,0c-0.2,0.2 -0.2,0.51 0,0.71l1.3,1.3C6.97,3.26 6,5.01 6,7h12c0,-1.99 -0.97,-3.75 -2.47,-4.84Z"/></svg> {t("home.recycling")}</span>
+                        }
                       </span>
                     </div>
                     <p className="font-medium text-gray-900 text-sm truncate">{price.model_name}</p>
