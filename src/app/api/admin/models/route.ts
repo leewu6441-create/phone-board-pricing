@@ -34,7 +34,34 @@ export async function POST(request: NextRequest) {
   if (!session)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { name, brand_id, model_code, slug } = await request.json();
+  const body = await request.json();
+
+  // Batch create: { batch: true, brand_id: number, models: string[] }
+  if (body.batch && Array.isArray(body.models)) {
+    const results: { name: string; success: boolean; error?: string }[] = [];
+
+    for (const name of body.models) {
+      if (!name.trim()) continue;
+      try {
+        await prisma.deviceModel.create({
+          data: {
+            name: name.trim(),
+            brandId: body.brand_id,
+            slug: name.trim().toLowerCase().replace(/[^a-z0-9À-ỹ]+/g, "-").replace(/^-|-$/g, ""),
+          },
+        });
+        results.push({ name: name.trim(), success: true });
+      } catch (e: any) {
+        results.push({ name: name.trim(), success: false, error: e?.meta?.target ? "Duplicate" : "Error" });
+      }
+    }
+
+    const succeeded = results.filter((r) => r.success).length;
+    return NextResponse.json({ results, succeeded, total: results.length });
+  }
+
+  // Single create
+  const { name, brand_id, model_code, slug } = body;
   const model = await prisma.deviceModel.create({
     data: { name, brandId: brand_id, modelCode: model_code || null, slug },
   });

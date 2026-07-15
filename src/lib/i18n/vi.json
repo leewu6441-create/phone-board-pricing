@@ -36,7 +36,7 @@
   "price.notFoundDesc": "Không có kết quả cho \"{{query}}\"",
   "price.updated": "Cập nhật",
 
-  "footer.rights": "© {{year}} Bảng Giá Mainboard. Tất cả quyền được bảo lưu.",
+  "footer.rights": "© {{year}} Vertex. Tất cả quyền được bảo lưu.",
   "footer.disclaimer": "Bảng giá chỉ mang tính tham khảo. Vui lòng liên hệ qua Zalo để được báo giá chính xác.",
 
   "contact.fbGroup": "Nhóm Facebook",
@@ -102,6 +102,13 @@
 
   "admin.modelsTitle": "Quản lý model",
   "admin.addModel": "Thêm model",
+  "admin.batchAdd": "Thêm hàng loạt",
+  "admin.batchAddTitle": "Thêm nhiều model cùng lúc",
+  "admin.batchHint": "Nhập tên model, mỗi dòng một model",
+  "admin.batchPlaceholder": "iPhone 16 Pro Max\niPhone 16 Pro\niPhone 16\nSamsung S25 Ultra",
+  "admin.batchAddBtn": "Thêm {{count}} model",
+  "admin.batchSuccess": "Đã thêm {{count}} model",
+  "admin.batchResult": "Thành công {{ok}}, trùng lặp {{fail}}",
   "admin.selectBrand": "Chọn hãng...",
   "admin.modelName": "Tên model",
   "admin.modelNamePH": "VD: iPhone 16 Pro Max",

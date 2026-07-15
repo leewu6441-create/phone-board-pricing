@@ -5,11 +5,12 @@ import { Providers } from "./providers";
 
 export const metadata: Metadata = {
   title: {
-    default: "Bảng Giá Mainboard",
-    template: "%s | Bảng Giá Mainboard",
+    default: "Vertex",
+    template: "%s | Vertex",
   },
-  description: "Bảng giá thu mua mainboard điện thoại - Cập nhật mỗi ngày",
+  description: "Vertex - Bảng giá thu mua mainboard điện thoại - Cập nhật mỗi ngày",
   keywords: [
+    "vertex",
     "bảng giá mainboard",
     "thu mua mainboard",
     "giá mainboard điện thoại",

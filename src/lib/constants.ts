@@ -1,7 +1,7 @@
-export const SITE_NAME = "Bảng Giá Mainboard";
+export const SITE_NAME = "Vertex";
 
 export const SITE_DESCRIPTION =
-  "Bảng giá thu mua mainboard điện thoại - Cập nhật mỗi ngày";
+  "Vertex - Bảng giá thu mua mainboard điện thoại - Cập nhật mỗi ngày";
 
 export const DEFAULT_ZALO_LINK = "https://zalo.me/your-zalo-phone";
 

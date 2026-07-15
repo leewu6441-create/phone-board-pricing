@@ -9,7 +9,7 @@ const defaults: Record<string, string> = {
   wechat_qrcode: DEFAULT_WECHAT_QRCODE,
   contact_phone: "",
   notice_text: "",
-  site_name: "Bảng Giá Mainboard",
+  site_name: "Vertex",
 };
 
 export async function getSetting(key: string): Promise<string | null> {

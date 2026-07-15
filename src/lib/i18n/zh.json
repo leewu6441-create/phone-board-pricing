@@ -36,7 +36,7 @@
   "price.notFoundDesc": "未找到 \"{{query}}\"",
   "price.updated": "更新",
 
-  "footer.rights": "© {{year}} 主板报价网。版权所有。",
+  "footer.rights": "© {{year}} Vertex。版权所有。",
   "footer.disclaimer": "价格仅供参考。请通过 Zalo 联系我们获取准确报价。",
 
   "contact.fbGroup": "Facebook 群组",
@@ -102,6 +102,13 @@
 
   "admin.modelsTitle": "型号管理",
   "admin.addModel": "添加型号",
+  "admin.batchAdd": "批量添加",
+  "admin.batchAddTitle": "一次性添加多个型号",
+  "admin.batchHint": "输入型号名称，每行一个",
+  "admin.batchPlaceholder": "iPhone 16 Pro Max\niPhone 16 Pro\niPhone 16\n三星 S25 Ultra",
+  "admin.batchAddBtn": "添加 {{count}} 个型号",
+  "admin.batchSuccess": "成功添加 {{count}} 个型号",
+  "admin.batchResult": "成功 {{ok}} 个，重复 {{fail}} 个",
   "admin.selectBrand": "选择品牌...",
   "admin.modelName": "型号名称",
   "admin.modelNamePH": "例如：iPhone 16 Pro Max",

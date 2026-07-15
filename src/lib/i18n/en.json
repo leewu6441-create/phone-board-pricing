@@ -36,7 +36,7 @@
   "price.notFoundDesc": "No results for \"{{query}}\"",
   "price.updated": "Updated",
 
-  "footer.rights": "© {{year}} Motherboard Price List. All rights reserved.",
+  "footer.rights": "© {{year}} Vertex. All rights reserved.",
   "footer.disclaimer": "Prices are for reference only. Please contact us via Zalo for accurate pricing.",
 
   "contact.fbGroup": "Facebook Group",
@@ -102,6 +102,13 @@
 
   "admin.modelsTitle": "Model Management",
   "admin.addModel": "Add Model",
+  "admin.batchAdd": "Batch Add",
+  "admin.batchAddTitle": "Add multiple models at once",
+  "admin.batchHint": "Enter model names, one per line",
+  "admin.batchPlaceholder": "iPhone 16 Pro Max\niPhone 16 Pro\niPhone 16\nSamsung S25 Ultra",
+  "admin.batchAddBtn": "Add {{count}} models",
+  "admin.batchSuccess": "Added {{count}} models",
+  "admin.batchResult": "{{ok}} succeeded, {{fail}} duplicates",
   "admin.selectBrand": "Select brand...",
   "admin.modelName": "Model name",
   "admin.modelNamePH": "e.g. iPhone 16 Pro Max",

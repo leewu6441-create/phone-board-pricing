@@ -20,7 +20,7 @@ export function PublicHeader() {
           <Link href="/" className="flex items-center gap-2 shrink-0">
             <Smartphone className="h-6 w-6 text-blue-300" />
             <div>
-              <h1 className="text-base font-bold leading-tight">Bảng Giá Mainboard</h1>
+              <h1 className="text-base font-bold leading-tight">Vertex</h1>
               <p className="text-[10px] text-blue-200 leading-tight">
                 {t("nav.updated")}: {today}
               </p>

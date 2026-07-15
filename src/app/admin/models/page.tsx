@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button"; import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; import { Badge } from "@/components/ui/badge";
 import { useTranslation } from "@/lib/i18n"; import { generateSlug } from "@/lib/utils";
-import { Plus, Trash2, Loader2, Check, X } from "lucide-react"; import { toast } from "sonner";
+import { Plus, Trash2, Loader2, Check, X, ListPlus } from "lucide-react"; import { toast } from "sonner";
 
 interface ModelData { id: number; name: string; model_code: string | null; brand_id: number; brand_name: string; category_name: string; is_active: boolean; }
 interface BrandData { id: number; name: string; category_id: number; category_name: string; }
@@ -15,6 +15,12 @@ export default function AdminModelsPage() {
   const [loading, setLoading] = useState(true); const [showAdd, setShowAdd] = useState(false);
   const [newName, setNewName] = useState(""); const [newCode, setNewCode] = useState(""); const [newBrandId, setNewBrandId] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null); const [editName, setEditName] = useState("");
+
+  // Batch add state
+  const [showBatch, setShowBatch] = useState(false);
+  const [batchText, setBatchText] = useState("");
+  const [batchBrandId, setBatchBrandId] = useState("");
+  const [batchAdding, setBatchAdding] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -28,6 +34,30 @@ export default function AdminModelsPage() {
     const res = await fetch("/api/admin/models", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: newName.trim(), model_code: newCode.trim() || null, brand_id: parseInt(newBrandId), slug: generateSlug(newName) }) });
     if (res.ok) { toast.success(t("admin.added")); setNewName(""); setNewCode(""); setNewBrandId(""); setShowAdd(false); fetchData(); }
     else { const d = await res.json(); toast.error(t("admin.error") + ": " + (d.error || "")); }
+  };
+
+  const handleBatchAdd = async () => {
+    if (!batchText.trim() || !batchBrandId) { toast.error(t("admin.fillAll")); return; }
+    const names = batchText.split("\n").map((l) => l.trim()).filter(Boolean);
+    if (names.length === 0) { toast.error(t("admin.fillAll")); return; }
+    setBatchAdding(true);
+    const res = await fetch("/api/admin/models", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ batch: true, brand_id: parseInt(batchBrandId), models: names }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const dupes = data.results.filter((r: any) => !r.success).length;
+      if (dupes > 0) {
+        toast.warning(t("admin.batchResult", { ok: data.succeeded, fail: dupes }));
+      } else {
+        toast.success(t("admin.batchSuccess", { count: data.succeeded }));
+      }
+      setBatchText(""); setBatchBrandId(""); setShowBatch(false); fetchData();
+    } else {
+      toast.error(t("admin.error"));
+    }
+    setBatchAdding(false);
   };
 
   const handleDelete = async (id: number, name: string) => {
@@ -51,13 +81,32 @@ export default function AdminModelsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6"><h1 className="text-xl font-bold text-gray-900">{t("admin.modelsTitle")}</h1><Button onClick={() => setShowAdd(!showAdd)}><Plus size={16} className="mr-2" />{t("admin.addModel")}</Button></div>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-xl font-bold text-gray-900">{t("admin.modelsTitle")}</h1>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => { setShowBatch(!showBatch); setShowAdd(false); }}><ListPlus size={16} className="mr-2" />{t("admin.batchAdd")}</Button>
+          <Button onClick={() => { setShowAdd(!showAdd); setShowBatch(false); }}><Plus size={16} className="mr-2" />{t("admin.addModel")}</Button>
+        </div>
+      </div>
+
+      {/* Single Add */}
       {showAdd && (<Card className="mb-6"><CardContent className="p-4"><div className="flex flex-wrap gap-3 items-end">
         <div className="flex-1 min-w-[150px]"><label className="text-xs text-gray-500 mb-1 block">{t("admin.brandName")}</label><select value={newBrandId} onChange={(e) => setNewBrandId(e.target.value)} className="w-full h-9 rounded-md border border-gray-300 px-3 text-sm"><option value="">{t("admin.selectBrand")}</option>{brands.map((b) => <option key={b.id} value={b.id}>{b.name} ({b.category_name})</option>)}</select></div>
         <div className="flex-[2] min-w-[200px]"><label className="text-xs text-gray-500 mb-1 block">{t("admin.modelName")}</label><Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder={t("admin.modelNamePH")} /></div>
         <div className="flex-1 min-w-[120px]"><label className="text-xs text-gray-500 mb-1 block">{t("admin.modelCode")}</label><Input value={newCode} onChange={(e) => setNewCode(e.target.value)} placeholder="A3296" /></div>
         <Button onClick={handleAdd}>{t("admin.add")}</Button><Button variant="ghost" onClick={() => setShowAdd(false)}>{t("admin.cancel")}</Button>
       </div></CardContent></Card>)}
+
+      {/* Batch Add */}
+      {showBatch && (<Card className="mb-6"><CardHeader className="pb-2"><CardTitle className="text-base">{t("admin.batchAddTitle")}</CardTitle></CardHeader><CardContent className="space-y-3">
+        <div><label className="text-xs text-gray-500 mb-1 block">{t("admin.selectBrand")}</label><select value={batchBrandId} onChange={(e) => setBatchBrandId(e.target.value)} className="w-full h-9 rounded-md border border-gray-300 px-3 text-sm"><option value="">{t("admin.selectBrand")}...</option>{brands.map((b) => <option key={b.id} value={b.id}>{b.name} ({b.category_name})</option>)}</select></div>
+        <div><label className="text-xs text-gray-500 mb-1 block">{t("admin.batchHint")}</label><textarea value={batchText} onChange={(e) => setBatchText(e.target.value)} placeholder={t("admin.batchPlaceholder")} rows={6} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm resize-y" /></div>
+        <div className="flex gap-2 items-center">
+          <Button onClick={handleBatchAdd} disabled={batchAdding}>{batchAdding ? <><Loader2 size={16} className="mr-2 animate-spin" />{t("admin.saving")}</> : t("admin.batchAddBtn", { count: batchText.split("\n").filter(Boolean).length })}</Button>
+          <Button variant="ghost" onClick={() => setShowBatch(false)}>{t("admin.cancel")}</Button>
+        </div>
+      </CardContent></Card>)}
+
       <div className="space-y-6">
         {Object.entries(grouped).map(([gk, gm]) => (<Card key={gk}><CardHeader className="pb-2"><CardTitle className="text-base text-gray-700">{gk} <span className="text-gray-400 text-sm ml-2 font-normal">({gm.length})</span></CardTitle></CardHeader>
           <CardContent><table className="admin-table"><thead><tr><th>{t("admin.colName")}</th><th>{t("admin.colCode")}</th><th>{t("admin.colStatus")}</th><th className="w-20 text-center">{t("admin.colDelete")}</th></tr></thead>
