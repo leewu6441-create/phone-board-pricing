@@ -1,4 +1,4 @@
-# Bảng Giá Mainboard - 手机主板回收报价网站
+# Vertex - 手机主板回收报价网站
 
 网站用于越南手机主板回收业务，客户可每日查看最新报价。管理员后台可随时修改价格和型号。
 
@@ -59,7 +59,7 @@ npm run dev
 ## 项目结构
 
 ```
-phone-board-pricing/
+vertexglobal-hq/
 ├── src/
 │   ├── app/                    # 页面路由
 │   │   ├── page.tsx            # 首页

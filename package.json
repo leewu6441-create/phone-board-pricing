@@ -1,7 +1,7 @@
 {
-  "name": "phone-board-pricing",
+  "name": "vertexglobal-hq",
   "version": "1.0.0",
-  "description": "Bảng Giá Mainboard - Mobile Phone Motherboard Price List",
+  "description": "Vertex - Mobile Phone Motherboard Price List",
   "private": true,
   "scripts": {
     "dev": "next dev",

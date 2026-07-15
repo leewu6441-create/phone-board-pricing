@@ -4,7 +4,7 @@ import { prisma } from "./prisma";
 import bcrypt from "bcryptjs";
 
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "phone-board-pricing-secret-change-me"
+  process.env.JWT_SECRET || "vertexglobal-hq-secret-change-me"
 );
 
 const COOKIE_NAME = "admin_session";
@@ -121,5 +121,5 @@ export async function ensureAdminUser(
     },
   });
 
-  console.log("Admin user created:", email);
+  // Admin user created
 }

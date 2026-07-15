@@ -36,7 +36,7 @@ export default function AdminLoginPage() {
             <Smartphone className="h-6 w-6 text-primary-600" />
           </div>
           <CardTitle className="text-lg">{t("admin.loginTitle")}</CardTitle>
-          <p className="text-xs text-gray-500 mt-1">Bảng Giá Mainboard</p>
+          <p className="text-xs text-gray-500 mt-1">Vertex</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

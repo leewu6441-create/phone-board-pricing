@@ -110,7 +110,7 @@ export async function GET() {
       { key: "zalo_link", value: "https://zalo.me/your-zalo-phone" },
       { key: "facebook_link", value: "https://facebook.com/groups/your-group" },
       { key: "notice_text", value: "" },
-      { key: "site_name", value: "Bảng Giá Mainboard" },
+      { key: "site_name", value: "Vertex" },
     ];
     for (const s of settings) {
       await prisma.siteSetting.upsert({ where: { key: s.key }, update: {}, create: s });
