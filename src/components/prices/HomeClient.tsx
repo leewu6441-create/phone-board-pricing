@@ -115,7 +115,11 @@ export function HomeClient({ prices, noticeText }: HomeClientProps) {
                     <p className="font-medium text-gray-900 text-sm truncate">{price.model_name}</p>
                     <p className="text-xs text-gray-500 truncate">{price.variant}</p>
                   </div>
-                  <VndPrice amount={price.price_vnd} className="text-base shrink-0 ml-3" />
+                  {(price as any).is_active !== false ? (
+                    <VndPrice amount={price.price_vnd} className="text-base shrink-0 ml-3" />
+                  ) : (
+                    <span className="text-red-500 font-bold text-sm shrink-0 ml-3">{t("price.contactUs")}</span>
+                  )}
                 </CardContent>
               </Card>
             ))}

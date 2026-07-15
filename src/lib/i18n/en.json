@@ -45,6 +45,7 @@
   "price.noDataDesc": "Price list is being updated.",
   "price.notFound": "Not found",
   "price.notFoundDesc": "No results for \"{{query}}\"",
+  "price.contactUs": "Contact",
   "price.updated": "Updated",
 
   "footer.rights": "© {{year}} Vertex. All rights reserved.",

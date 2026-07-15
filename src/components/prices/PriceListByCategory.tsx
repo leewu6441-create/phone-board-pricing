@@ -11,7 +11,7 @@ import { useTranslation } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 interface PriceData {
-  id: number; device_model_id: number; variant: string; price_vnd: number;
+  id: number; device_model_id: number; variant: string; price_vnd: number; is_active: boolean;
   model_name: string; brand_name: string; category_slug: string;
 }
 
@@ -107,7 +107,11 @@ export function PriceListByCategory({ categorySlug, title, icon }: PriceListByCa
                   {mprices.map((pr) => (
                     <div key={pr.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50/50">
                       <span className="text-sm text-gray-700 flex-1 min-w-0 pr-3">{pr.variant}</span>
-                      <VndPrice amount={pr.price_vnd} className="text-base shrink-0" />
+                      {pr.is_active ? (
+                        <VndPrice amount={pr.price_vnd} className="text-base shrink-0" />
+                      ) : (
+                        <span className="text-red-500 font-bold text-sm shrink-0 ml-3">{t("price.contactUs")}</span>
+                      )}
                     </div>
                   ))}
                 </div>

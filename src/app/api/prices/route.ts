@@ -6,7 +6,7 @@ export async function GET(request: NextRequest) {
   const category = searchParams.get("category");
   const search = searchParams.get("search");
 
-  let where: any = { isActive: true };
+  let where: any = {}; // Show all, hide_price controls whether price is visible
 
   if (category) {
     where.deviceModel = {
@@ -48,6 +48,7 @@ export async function GET(request: NextRequest) {
     storage: p.storage,
     region_version: p.regionVersion,
     listing_type: p.listingType,
+    is_active: p.isActive,
     model_name: p.deviceModel.name,
     brand_name: p.deviceModel.brand.name,
     category_slug: p.deviceModel.brand.category.slug,

@@ -18,6 +18,7 @@ interface PriceData {
   storage: string | null;
   region_version: string | null;
   listing_type: string | null;
+  is_active: boolean;
   model_name: string;
   brand_name: string;
   category_slug: string;
@@ -121,13 +122,17 @@ export function ApplePriceList() {
                 )}
               </div>
 
-              {/* Price — prominent sale display */}
-              <div className="border-t border-green-200 px-4 py-3.5 bg-green-50 flex items-center justify-between">
+              {/* Price */}
+              <div className={`border-t px-4 py-3.5 flex items-center justify-between ${p.is_active ? "border-green-200 bg-green-50" : "border-gray-200 bg-gray-50"}`}>
                 <div className="flex items-center gap-1.5">
-                  <Tag size={14} className="text-green-600" />
-                  <span className="text-green-700 font-bold text-sm uppercase tracking-wide">{t("apple.salePrice")}</span>
+                  <Tag size={14} className={p.is_active ? "text-green-600" : "text-gray-400"} />
+                  <span className={`font-bold text-sm uppercase tracking-wide ${p.is_active ? "text-green-700" : "text-gray-500"}`}>{t("apple.salePrice")}</span>
                 </div>
-                <VndPrice amount={p.price_vnd} className="text-xl" />
+                {p.is_active ? (
+                  <VndPrice amount={p.price_vnd} className="text-xl" />
+                ) : (
+                  <span className="text-red-500 font-bold text-sm">{t("price.contactUs")}</span>
+                )}
               </div>
             </Card>
           ))}
