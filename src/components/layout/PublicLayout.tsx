@@ -29,9 +29,10 @@ export async function PublicLayout({ children }: PublicLayoutProps) {
           const type = typeof item === "string" ? "image" : item.type || "image";
           // External URLs: pass directly
           if (data.startsWith("http")) return data;
-          // Base64: use extension-based URL for mobile compatibility
-          const ext = type === "video" ? "mp4" : data.includes("image/png") ? "png" : "jpg";
-          return `/api/ad-media/${i}.${ext}`;
+          // Images: use data URL directly (small, reliable)
+          if (type === "image") return data;
+          // Videos: use API endpoint
+          return `/api/ad-media/${i}.mp4`;
         });
       }
     }
