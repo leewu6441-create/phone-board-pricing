@@ -45,7 +45,7 @@
   "price.noDataDesc": "报价表正在更新中。",
   "price.notFound": "未找到",
   "price.notFoundDesc": "未找到 \"{{query}}\"",
-  "price.contactUs": "私聊",
+  "price.contactUs": "请联系获取价格",
   "price.updated": "更新",
 
   "footer.rights": "© {{year}} Vertex。版权所有。",

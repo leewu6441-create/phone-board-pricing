@@ -45,7 +45,7 @@
   "price.noDataDesc": "Bảng giá đang được cập nhật.",
   "price.notFound": "Không tìm thấy",
   "price.notFoundDesc": "Không có kết quả cho \"{{query}}\"",
-  "price.contactUs": "Liên hệ",
+  "price.contactUs": "Liên hệ để nhận giá",
   "price.updated": "Cập nhật",
 
   "footer.rights": "© {{year}} Vertex. Tất cả quyền được bảo lưu.",
