@@ -159,7 +159,7 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
                   webkit-playsinline="true"
                   x5-video-player-type="h5"
                   preload="auto"
-                  className="absolute inset-0 w-full h-full object-contain z-10"
+                  className="absolute inset-0 w-full h-full object-contain z-10 transition-opacity duration-700 ease-out"
                 />
                 {showPlayBtn && (
                   <button onClick={manualPlay} className="absolute inset-0 z-30 flex items-center justify-center bg-black/50">
@@ -173,7 +173,7 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
               <img
                 src={currentSrc}
                 alt="Ad"
-                className="absolute inset-0 w-full h-full object-contain opacity-100 z-10"
+                className="absolute inset-0 w-full h-full object-contain z-10 transition-opacity duration-700 ease-out"
               />
             )}
           </div>

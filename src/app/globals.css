@@ -10,20 +10,27 @@
   body {
     @apply bg-gray-50 text-gray-900 antialiased;
   }
+
+  /* Apple-style smooth scroll */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Apple-style focus ring */
+  *:focus-visible {
+    @apply outline-2 outline-blue-500 outline-offset-2 rounded-sm;
+  }
 }
 
 @layer components {
-  /* Price card styling */
   .price-card {
-    @apply bg-white rounded-lg border border-gray-100 p-4 transition-shadow hover:shadow-md;
+    @apply bg-white rounded-lg border border-gray-100 p-4 transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-0.5;
   }
 
-  /* Price highlight */
   .price-value {
     @apply text-lg font-bold text-danger-500;
   }
 
-  /* Admin table */
   .admin-table {
     @apply w-full text-sm text-left;
   }
@@ -40,9 +47,30 @@
     @apply bg-gray-50/50;
   }
 
-  /* Floating action button */
   .floating-btn {
     @apply fixed z-50 flex items-center justify-center w-14 h-14 rounded-full shadow-lg transition-all duration-300 hover:scale-110 active:scale-95;
+  }
+
+  /* Apple-style card hover */
+  .card-hover {
+    @apply transition-all duration-300 ease-out;
+  }
+  .card-hover:hover {
+    @apply -translate-y-1 shadow-lg;
+  }
+
+  /* Smooth expand/collapse */
+  .collapse-enter {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.35s ease, opacity 0.25s ease;
+  }
+  .collapse-open {
+    overflow: hidden;
+    max-height: 2000px;
+    opacity: 1;
+    transition: max-height 0.5s ease, opacity 0.3s ease;
   }
 }
 

@@ -89,7 +89,7 @@ export function ApplePriceList() {
       {filtered.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((p) => (
-            <Card key={p.id} className="overflow-hidden hover:shadow-lg transition-all hover:-translate-y-0.5">
+            <Card key={p.id} className="overflow-hidden transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-1">
               {/* Header - Model name & brand */}
               <div className="bg-gradient-to-r from-gray-900 to-gray-800 text-white px-4 py-3">
                 <p className="text-[10px] uppercase tracking-wider text-gray-400">{p.brand_name}</p>
