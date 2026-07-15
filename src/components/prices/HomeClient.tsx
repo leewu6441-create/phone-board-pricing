@@ -68,6 +68,7 @@ export function HomeClient({ prices, noticeText }: HomeClientProps) {
             <CardContent className="p-5 text-center">
               <svg viewBox="0 0 24 24" className="mx-auto h-12 w-12 text-green-700 mb-2" fill="currentColor"><path d="M6,18c0,0.55 0.45,1 1,1h1v3.5c0,0.83 0.67,1.5 1.5,1.5s1.5,-0.67 1.5,-1.5V19h2v3.5c0,0.83 0.67,1.5 1.5,1.5s1.5,-0.67 1.5,-1.5V19h1c0.55,0 1,-0.45 1,-1V8H6V18ZM3.5,8C2.67,8 2,8.67 2,9.5v7c0,0.83 0.67,1.5 1.5,1.5S5,17.33 5,16.5v-7C5,8.67 4.33,8 3.5,8ZM20.5,8c-0.83,0 -1.5,0.67 -1.5,1.5v7c0,0.83 0.67,1.5 1.5,1.5s1.5,-0.67 1.5,-1.5v-7c0,-0.83 -0.67,-1.5 -1.5,-1.5ZM15.53,2.16l1.3,-1.3c0.2,-0.2 0.2,-0.51 0,-0.71c-0.2,-0.2 -0.51,-0.2 -0.71,0l-1.48,1.48C13.85,1.23 12.95,1 12,1c-0.96,0 -1.86,0.23 -2.66,0.63L7.85,0.15c-0.2,-0.2 -0.51,-0.2 -0.71,0c-0.2,0.2 -0.2,0.51 0,0.71l1.3,1.3C6.97,3.26 6,5.01 6,7h12c0,-1.99 -0.97,-3.75 -2.47,-4.84Z"/></svg>
               <h3 className="text-lg font-bold text-gray-900">Android</h3>
+              <p className="text-[10px] text-orange-500 font-medium mt-0.5 uppercase tracking-wide">{t("android.mainboard")}</p>
               <p className="text-xs text-orange-600 font-medium mt-1">{t("home.androidModels", { count: androidPrices.length })}</p>
               <div className="mt-3 inline-flex items-center gap-1 px-3 py-1.5 bg-orange-500 text-white text-sm font-medium rounded-full hover:bg-orange-600 transition-colors">
                 {t("home.viewDetail")} <ArrowRight size={14} />
