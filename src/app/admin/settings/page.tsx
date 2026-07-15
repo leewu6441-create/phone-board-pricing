@@ -17,9 +17,7 @@ export default function AdminSettingsPage() {
   const [adMedia, setAdMedia] = useState<AdMediaItem[]>([]);
   const [editingLinkIdx, setEditingLinkIdx] = useState<number | null>(null);
   const [editLinkVal, setEditLinkVal] = useState("");
-  const [tickerVi, setTickerVi] = useState("");
-  const [tickerEn, setTickerEn] = useState("");
-  const [tickerZh, setTickerZh] = useState("");
+  const [tickerText, setTickerText] = useState("");
   const [notice, setNotice] = useState(""); const [phone, setPhone] = useState(""); const [site, setSite] = useState("");
   const [saving, setSaving] = useState(false); const [loading, setLoading] = useState(true);
   const zaloQrRef = useRef<HTMLInputElement>(null);
@@ -32,10 +30,7 @@ export default function AdminSettingsPage() {
     case "wechat_id": setWechat(s.value); break;
     case "wechat_qrcode": setWechatQrcode(s.value); break;
     case "ad_media": case "ad_images": try { const p = JSON.parse(s.value || "[]"); setAdMedia(Array.isArray(p) ? p.map((item: any) => typeof item === "string" ? { type: "image" as const, data: item } : item) : []); } catch { setAdMedia([]); } break;
-    case "ticker_text_vi": setTickerVi(s.value); break;
-    case "ticker_text_en": setTickerEn(s.value); break;
-    case "ticker_text_zh": setTickerZh(s.value); break;
-    case "ticker_text": if (!tickerVi) setTickerVi(s.value); if (!tickerEn) setTickerEn(s.value); if (!tickerZh) setTickerZh(s.value); break;
+    case "ticker_text": setTickerText(s.value); break;
     case "notice_text": setNotice(s.value); break;
     case "contact_phone": setPhone(s.value); break;
     case "site_name": setSite(s.value); break;
@@ -48,7 +43,7 @@ export default function AdminSettingsPage() {
     await Promise.all([
       save("facebook_link", fb), save("qrcode_image", qrcode), save("wechat_id", wechat), save("wechat_qrcode", wechatQrcode),
       save("ad_media", JSON.stringify(adMedia)), save("ad_images", JSON.stringify(adMedia)),
-      save("ticker_text_vi", tickerVi), save("ticker_text_en", tickerEn), save("ticker_text_zh", tickerZh),
+      save("ticker_text", tickerText),
       save("notice_text", notice), save("contact_phone", phone), save("site_name", site),
     ]);
     setSaving(false); toast.success(t("admin.settingsSaved"));
@@ -148,12 +143,8 @@ export default function AdminSettingsPage() {
           </div>
         </CardContent></Card>
 
-        {/* Ticker Text - per language */}
-        <Card><CardHeader><CardTitle className="flex items-center gap-2 text-base"><Bell size={18} className="text-blue-500" />{t("admin.tickerText")}</CardTitle><CardDescription>{t("admin.tickerDesc")}</CardDescription></CardHeader><CardContent className="space-y-3">
-          <div><label className="text-xs text-gray-500 mb-1 block">🇻🇳 Tiếng Việt</label><Input value={tickerVi} onChange={(e) => setTickerVi(e.target.value)} placeholder={t("admin.tickerPlaceholder")} /></div>
-          <div><label className="text-xs text-gray-500 mb-1 block">🇬🇧 English</label><Input value={tickerEn} onChange={(e) => setTickerEn(e.target.value)} placeholder={t("admin.tickerPlaceholder")} /></div>
-          <div><label className="text-xs text-gray-500 mb-1 block">🇨🇳 中文</label><Input value={tickerZh} onChange={(e) => setTickerZh(e.target.value)} placeholder={t("admin.tickerPlaceholder")} /></div>
-        </CardContent></Card>
+        {/* Ticker Text */}
+        <Card><CardHeader><CardTitle className="flex items-center gap-2 text-base"><Bell size={18} className="text-blue-500" />{t("admin.tickerText")}</CardTitle><CardDescription>{t("admin.tickerDesc")}</CardDescription></CardHeader><CardContent><Input value={tickerText} onChange={(e) => setTickerText(e.target.value)} placeholder={t("admin.tickerPlaceholder")} /></CardContent></Card>
 
         {/* Zalo QR */}
         <Card><CardHeader><CardTitle className="flex items-center gap-2 text-base"><QrCode size={18} className="text-blue-500" />{t("admin.qrCodeImage")}</CardTitle><CardDescription>{t("admin.qrCodeDesc")}</CardDescription></CardHeader><CardContent className="space-y-3">

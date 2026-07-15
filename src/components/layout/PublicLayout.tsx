@@ -27,11 +27,6 @@ export async function PublicLayout({ children }: PublicLayoutProps) {
     }
   } catch { /* empty */ }
 
-  // Get ticker text for all languages - try new keys first, fallback to old
-  const tickerVi = settings.ticker_text_vi || settings.ticker_text || "";
-  const tickerEn = settings.ticker_text_en || settings.ticker_text || "";
-  const tickerZh = settings.ticker_text_zh || settings.ticker_text || "";
-
   return (
     <div className="flex flex-col min-h-screen">
       <PublicHeader />
@@ -39,9 +34,7 @@ export async function PublicLayout({ children }: PublicLayoutProps) {
         mediaCount={mediaCount}
         mediaTypes={mediaTypes}
         mediaLinks={mediaLinks}
-        tickerVi={tickerVi}
-        tickerEn={tickerEn}
-        tickerZh={tickerZh}
+        tickerText={settings.ticker_text || ""}
       />
       <main className="flex-1">{children}</main>
       <PublicFooter />

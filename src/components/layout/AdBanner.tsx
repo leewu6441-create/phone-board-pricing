@@ -2,21 +2,16 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ChevronLeft, ChevronRight, Volume2, VolumeX, ExternalLink } from "lucide-react";
-import { useTranslation } from "@/lib/i18n";
-
 interface AdBannerProps {
   mediaCount: number;
   mediaTypes: ("image" | "video")[];
   mediaLinks: string[];
-  tickerVi: string;
-  tickerEn: string;
-  tickerZh: string;
+  tickerText: string;
 }
 
 const IDLE_TIMEOUT = 10000;
 
-export function AdBanner({ mediaCount, mediaTypes, mediaLinks, tickerVi, tickerEn, tickerZh }: AdBannerProps) {
-  const { lang } = useTranslation();
+export function AdBanner({ mediaCount, mediaTypes, mediaLinks, tickerText }: AdBannerProps) {
   const [current, setCurrent] = useState(0);
   const [muted, setMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -24,9 +19,6 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, tickerVi, tickerE
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const userPausedRef = useRef(false);
   const hasMedia = mediaCount > 0;
-
-  // Ticker text by language
-  const tickerText = lang === "en" ? tickerEn : lang === "zh" ? tickerZh : tickerVi;
   const hasTicker = tickerText.trim().length > 0;
   const isVideo = mediaTypes[current] === "video";
   const currentLink = mediaLinks[current] || "";
