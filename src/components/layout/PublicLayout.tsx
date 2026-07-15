@@ -26,13 +26,8 @@ export async function PublicLayout({ children }: PublicLayoutProps) {
         mediaLinks = parsed.map((item: any) => (typeof item === "string" ? "" : item.link || ""));
         mediaSrcs = parsed.map((item: any, i: number) => {
           const data = typeof item === "string" ? item : item.data;
-          const type = typeof item === "string" ? "image" : item.type || "image";
-          // External URLs: pass directly
-          if (data.startsWith("http")) return data;
-          // Images: use data URL directly (small, reliable)
-          if (type === "image") return data;
-          // Videos: use API endpoint
-          return `/api/ad-media/${i}.mp4`;
+          // External URLs or base64: pass directly (no API needed)
+          return data;
         });
       }
     }

@@ -129,8 +129,8 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
   return (
     <div className="bg-white border-b border-gray-200">
       {hasMedia && (
-        <div className="relative w-full overflow-hidden bg-black" style={{ maxHeight: "360px" }}>
-          <div className="relative w-full" style={{ aspectRatio: "3/1", maxHeight: "360px" }}>
+        <div className="relative w-full overflow-hidden bg-black" style={{ maxHeight: "480px" }}>
+          <div className="relative w-full" style={{ aspectRatio: "2/1", maxHeight: "480px" }}>
             {isVideo ? (
               <video
                 ref={setVideoRef}
@@ -146,7 +146,7 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
               <img
                 src={currentSrc}
                 alt="Ad"
-                className="absolute inset-0 w-full h-full object-cover opacity-100 z-10"
+                className="absolute inset-0 w-full h-full object-contain opacity-100 z-10"
               />
             )}
           </div>
