@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { ChevronLeft, ChevronRight, Volume2, VolumeX, ExternalLink } from "lucide-react";
+import { useTranslation } from "@/lib/i18n";
+
 interface AdBannerProps {
   mediaCount: number;
   mediaTypes: ("image" | "video")[];
@@ -11,9 +13,19 @@ interface AdBannerProps {
 
 const IDLE_TIMEOUT = 10000;
 
+// Detect if text contains Chinese characters
+function isChinese(text: string): boolean {
+  return /[一-鿿㐀-䶿]/.test(text);
+}
+
+// Translation cache (client-side, per session)
+const transCache: Record<string, string> = {};
+
 export function AdBanner({ mediaCount, mediaTypes, mediaLinks, tickerText }: AdBannerProps) {
+  const { lang } = useTranslation();
   const [current, setCurrent] = useState(0);
   const [muted, setMuted] = useState(true);
+  const [displayTicker, setDisplayTicker] = useState(tickerText);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const setVideoRef = useCallback((el: HTMLVideoElement | null) => { videoRef.current = el; }, []);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -22,6 +34,41 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, tickerText }: AdB
   const hasTicker = tickerText.trim().length > 0;
   const isVideo = mediaTypes[current] === "video";
   const currentLink = mediaLinks[current] || "";
+
+  // Auto-translate ticker when language changes
+  useEffect(() => {
+    if (!tickerText.trim()) { setDisplayTicker(""); return; }
+
+    // If text is Chinese and user wants vi/en, translate
+    const needsTranslation = isChinese(tickerText) && lang !== "zh";
+    const targetLang = lang === "en" ? "en" : lang === "zh" ? "zh" : "vi";
+    const sourceLang = isChinese(tickerText) ? "zh" : "auto";
+
+    if (!needsTranslation && lang === "zh") {
+      setDisplayTicker(tickerText);
+      return;
+    }
+    if (!needsTranslation && lang === "vi" && !isChinese(tickerText)) {
+      setDisplayTicker(tickerText);
+      return;
+    }
+
+    const cacheKey = `${sourceLang}:${targetLang}:${tickerText}`;
+    if (transCache[cacheKey]) {
+      setDisplayTicker(transCache[cacheKey]);
+      return;
+    }
+
+    fetch(`/api/translate?text=${encodeURIComponent(tickerText)}&from=${sourceLang}&to=${targetLang}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.text) {
+          transCache[cacheKey] = data.text;
+          setDisplayTicker(data.text);
+        }
+      })
+      .catch(() => setDisplayTicker(tickerText));
+  }, [tickerText, lang]);
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
@@ -172,7 +219,7 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, tickerText }: AdB
             <span className="text-xs font-bold uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded shrink-0">TIN TỨC</span>
             <div className="overflow-hidden flex-1 relative h-5">
               <div className="animate-marquee whitespace-nowrap absolute text-sm font-medium">
-                {tickerText}<span className="inline-block w-16">&nbsp;</span>{tickerText}
+                {displayTicker}<span className="inline-block w-16">&nbsp;</span>{displayTicker}
               </div>
             </div>
           </div>
