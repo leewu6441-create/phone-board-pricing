@@ -76,7 +76,7 @@ export default function AdminSettingsPage() {
   const addAdVideoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 15 * 1024 * 1024) { toast.error("Video too large (max 15MB)"); return; }
+    if (file.size > 8 * 1024 * 1024) { toast.error("Video too large (max 8MB). Please compress first."); return; }
     const reader = new FileReader();
     reader.onload = () => { setAdMedia((prev) => [...prev, { type: "video", data: reader.result as string }]); };
     reader.readAsDataURL(file);

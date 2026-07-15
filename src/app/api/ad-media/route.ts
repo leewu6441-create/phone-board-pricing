@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAllSettings } from "@/lib/db/settings";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
@@ -7,13 +7,13 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const idx = parseInt(searchParams.get("idx") || "0");
 
-  const settings = await getAllSettings();
+  // Only fetch the ad_media setting (not all settings) for performance
+  const setting = await prisma.siteSetting.findFirst({
+    where: { key: { in: ["ad_media", "ad_images"] } },
+    orderBy: { key: "desc" }, // prefer ad_media over ad_images
+  });
 
-  let raw = settings.ad_media;
-  if (!raw || raw === "[]") {
-    raw = settings.ad_images || "";
-  }
-
+  const raw = setting?.value;
   if (!raw || raw === "[]") {
     return new NextResponse("No media", { status: 404 });
   }
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
 
     const data = typeof item === "string" ? item : item.data;
 
-    // External URL — directly pass through (video elements use this directly now)
+    // External HTTP URL — redirect
     if (data.startsWith("http")) {
       return NextResponse.redirect(data);
     }
@@ -35,49 +35,19 @@ export async function GET(request: NextRequest) {
       return new NextResponse("Invalid", { status: 400 });
     }
 
-    const matches = data.match(/^data:([^;]+);base64,(.+)$/);
-    if (!matches) return new NextResponse("Invalid format", { status: 400 });
-
-    const mimeType = matches[1];
-    const base64 = matches[2];
+    const comma = data.indexOf(",");
+    const header = data.substring(0, comma);
+    const base64 = data.substring(comma + 1);
+    const mimeMatch = header.match(/data:([^;]+)/);
+    const mimeType = mimeMatch ? mimeMatch[1] : "application/octet-stream";
     const buffer = Buffer.from(base64, "base64");
 
-    // For videos, use chunked streaming to handle larger files
-    if (mimeType.startsWith("video/")) {
-      const CHUNK_SIZE = 64 * 1024; // 64KB chunks
-      const stream = new ReadableStream({
-        start(controller) {
-          let offset = 0;
-          function push() {
-            if (offset >= buffer.length) {
-              controller.close();
-              return;
-            }
-            const end = Math.min(offset + CHUNK_SIZE, buffer.length);
-            controller.enqueue(buffer.subarray(offset, end));
-            offset = end;
-            // Small delay to avoid overwhelming the connection
-            setTimeout(push, 0);
-          }
-          push();
-        },
-      });
-
-      return new NextResponse(stream, {
-        headers: {
-          "Content-Type": mimeType,
-          "Cache-Control": "public, max-age=86400",
-          "Content-Length": buffer.length.toString(),
-        },
-      });
-    }
-
-    // Images: return directly
     return new NextResponse(buffer, {
       headers: {
         "Content-Type": mimeType,
-        "Cache-Control": "public, max-age=86400",
+        "Cache-Control": "public, max-age=86400, immutable",
         "Content-Length": buffer.length.toString(),
+        "Accept-Ranges": "bytes",
       },
     });
   } catch {

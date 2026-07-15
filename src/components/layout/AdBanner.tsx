@@ -190,6 +190,12 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
 
   const mediaContent = hasMedia && (
     <div className="relative w-full overflow-hidden bg-black" style={{ maxHeight: "360px" }} onClick={manualPlay}>
+      {/* Video loading spinner */}
+      {isVideo && !videoReady && !needTap && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/60">
+          <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+        </div>
+      )}
       {/* Mobile tap-to-play overlay */}
       {isVideo && needTap && (
         <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/50 cursor-pointer">
