@@ -1,18 +1,18 @@
 import { PublicLayout } from "@/components/layout/PublicLayout";
-import { PriceListByCategory } from "@/components/prices/PriceListByCategory";
+import { ApplePriceList } from "@/components/prices/ApplePriceList";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export const metadata = {
-  title: "Apple - Bảng giá Mainboard iPhone",
-  description: "Bảng giá thu mua mainboard iPhone - Cập nhật mỗi ngày",
+  title: "Apple - Bảng giá iPhone",
+  description: "Bảng giá bán iPhone chính hãng - Cập nhật mỗi ngày. Đầy đủ thông tin pin, bộ nhớ, phiên bản khu vực.",
 };
 
 export default function ApplePage() {
   return (
     <PublicLayout>
-      <PriceListByCategory categorySlug="apple" title="Apple" icon="🍎" />
+      <ApplePriceList />
     </PublicLayout>
   );
 }

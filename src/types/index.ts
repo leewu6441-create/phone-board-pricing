@@ -44,6 +44,10 @@ export interface PriceEntry {
   device_model_id: number;
   variant: string;
   price_vnd: number;
+  battery_info: string | null;
+  storage: string | null;
+  region_version: string | null;
+  listing_type: string | null;
   is_active: boolean;
   sort_order: number;
   created_at: string;
@@ -51,6 +55,7 @@ export interface PriceEntry {
   // Joined fields
   model_name?: string;
   brand_name?: string;
+  category_slug?: string;
 }
 
 export interface PriceHistory {

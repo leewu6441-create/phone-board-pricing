@@ -26,6 +26,12 @@
   "search.categoryApple": "Apple",
   "search.categoryAndroid": "Android",
 
+  "apple.title": "iPhone - Sales Price List",
+  "apple.salePrice": "Price",
+  "apple.storage": "Storage",
+  "apple.battery": "Battery",
+  "apple.region": "Region",
+
   "price.expandAll": "Expand all",
   "price.filterByName": "Filter by name, brand...",
   "price.foundModels": "Found {{count}} models",

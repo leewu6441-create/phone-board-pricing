@@ -26,6 +26,12 @@
   "search.categoryApple": "Apple",
   "search.categoryAndroid": "Android",
 
+  "apple.title": "iPhone - Bảng Giá Bán",
+  "apple.salePrice": "Giá bán",
+  "apple.storage": "Bộ nhớ",
+  "apple.battery": "Pin",
+  "apple.region": "Khu vực",
+
   "price.expandAll": "Mở tất cả",
   "price.filterByName": "Tìm theo tên máy, hãng...",
   "price.foundModels": "Tìm thấy {{count}} model",

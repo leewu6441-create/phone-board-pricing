@@ -5,6 +5,10 @@ export interface PriceRowWithModel {
   device_model_id: number;
   variant: string;
   price_vnd: number;
+  battery_info: string | null;
+  storage: string | null;
+  region_version: string | null;
+  listing_type: string | null;
   is_active: boolean;
   sort_order: number;
   created_at: string;
@@ -45,6 +49,10 @@ export async function getPricesByCategory(
     device_model_id: p.deviceModelId,
     variant: p.variant,
     price_vnd: Number(p.priceVnd),
+    battery_info: p.batteryInfo,
+    storage: p.storage,
+    region_version: p.regionVersion,
+    listing_type: p.listingType,
     is_active: p.isActive,
     sort_order: p.sortOrder,
     created_at: p.createdAt.toISOString(),
@@ -76,6 +84,10 @@ export async function getAllPrices(): Promise<PriceRowWithModel[]> {
     device_model_id: p.deviceModelId,
     variant: p.variant,
     price_vnd: Number(p.priceVnd),
+    battery_info: p.batteryInfo,
+    storage: p.storage,
+    region_version: p.regionVersion,
+    listing_type: p.listingType,
     is_active: p.isActive,
     sort_order: p.sortOrder,
     created_at: p.createdAt.toISOString(),
@@ -122,12 +134,20 @@ export async function createPrice(data: {
   device_model_id: number;
   variant: string;
   price_vnd: number;
+  battery_info?: string;
+  storage?: string;
+  region_version?: string;
+  listing_type?: string;
 }) {
   return prisma.priceEntry.create({
     data: {
       deviceModelId: data.device_model_id,
       variant: data.variant,
       priceVnd: BigInt(data.price_vnd),
+      batteryInfo: data.battery_info || null,
+      storage: data.storage || null,
+      regionVersion: data.region_version || null,
+      listingType: data.listing_type || "recycle",
     },
   });
 }

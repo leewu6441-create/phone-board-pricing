@@ -26,6 +26,12 @@
   "search.categoryApple": "苹果",
   "search.categoryAndroid": "安卓",
 
+  "apple.title": "iPhone - 销售报价",
+  "apple.salePrice": "售价",
+  "apple.storage": "存储",
+  "apple.battery": "电池",
+  "apple.region": "地区",
+
   "price.expandAll": "展开全部",
   "price.filterByName": "按名称、品牌筛选...",
   "price.foundModels": "找到 {{count}} 个型号",

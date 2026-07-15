@@ -22,6 +22,10 @@ export async function GET() {
     device_model_id: p.deviceModelId,
     variant: p.variant,
     price_vnd: Number(p.priceVnd),
+    battery_info: p.batteryInfo,
+    storage: p.storage,
+    region_version: p.regionVersion,
+    listing_type: p.listingType,
     is_active: p.isActive,
     sort_order: p.sortOrder,
     created_at: p.createdAt.toISOString(),
@@ -40,13 +44,17 @@ export async function POST(request: NextRequest) {
   if (!session)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { device_model_id, variant, price_vnd } = await request.json();
+  const { device_model_id, variant, price_vnd, battery_info, storage, region_version, listing_type } = await request.json();
 
   const price = await prisma.priceEntry.create({
     data: {
       deviceModelId: device_model_id,
       variant: variant || "New variant",
       priceVnd: BigInt(price_vnd || 0),
+      batteryInfo: battery_info || null,
+      storage: storage || null,
+      regionVersion: region_version || null,
+      listingType: listing_type || "recycle",
     },
     include: {
       deviceModel: {
@@ -59,6 +67,10 @@ export async function POST(request: NextRequest) {
     ...price,
     device_model_id: price.deviceModelId,
     price_vnd: Number(price.priceVnd),
+    battery_info: price.batteryInfo,
+    storage: price.storage,
+    region_version: price.regionVersion,
+    listing_type: price.listingType,
     is_active: price.isActive,
     sort_order: price.sortOrder,
     created_at: price.createdAt.toISOString(),
@@ -75,7 +87,7 @@ export async function PUT(request: NextRequest) {
   if (!session)
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { id, price_vnd, variant } = await request.json();
+  const { id, price_vnd, variant, battery_info, storage, region_version, listing_type } = await request.json();
 
   const current = await prisma.priceEntry.findUnique({
     where: { id },
@@ -89,6 +101,10 @@ export async function PUT(request: NextRequest) {
     data: {
       ...(price_vnd !== undefined && { priceVnd: BigInt(price_vnd) }),
       ...(variant !== undefined && { variant }),
+      ...(battery_info !== undefined && { batteryInfo: battery_info || null }),
+      ...(storage !== undefined && { storage: storage || null }),
+      ...(region_version !== undefined && { regionVersion: region_version || null }),
+      ...(listing_type !== undefined && { listingType: listing_type }),
     },
   });
 
