@@ -14,38 +14,17 @@ interface AdBannerProps {
 
 const IDLE_TIMEOUT = 10000;
 
-// Detect Chinese characters
 function isChinese(text: string): boolean {
   return /[一-鿿㐀-䶿]/.test(text);
 }
 
 const transCache: Record<string, string> = {};
 
-// Cache for fetched blob URLs (video only)
-const blobCache: Record<string, string> = {};
-
-async function getVideoBlobUrl(src: string): Promise<string> {
-  if (blobCache[src]) return blobCache[src];
-  if (!src.startsWith("/api/ad-media/")) return src;
-  try {
-    const res = await fetch(src);
-    if (res.redirected) return res.url;
-    if (!res.ok) return src;
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    blobCache[src] = url;
-    return url;
-  } catch {
-    return src;
-  }
-}
-
 export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, tickerText }: AdBannerProps) {
   const { lang } = useTranslation();
   const [current, setCurrent] = useState(0);
   const [muted, setMuted] = useState(true);
   const [displayTicker, setDisplayTicker] = useState(tickerText);
-  const [videoDataUrl, setVideoDataUrl] = useState("");
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const setVideoRef = useCallback((el: HTMLVideoElement | null) => { videoRef.current = el; }, []);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -54,6 +33,7 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
   const hasTicker = tickerText.trim().length > 0;
   const isVideo = mediaTypes[current] === "video";
   const currentLink = mediaLinks[current] || "";
+  const currentSrc = mediaSrcs[current] || "";
 
   // Auto-translate ticker
   useEffect(() => {
@@ -70,17 +50,6 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
       .then((data) => { if (data.text) { transCache[cacheKey] = data.text; setDisplayTicker(data.text); } })
       .catch(() => setDisplayTicker(tickerText));
   }, [tickerText, lang]);
-
-  // Fetch video blob URL
-  useEffect(() => {
-    if (!hasMedia) return;
-    const src = mediaSrcs[current] || "";
-    if (isVideo) {
-      getVideoBlobUrl(src).then(setVideoDataUrl);
-    } else {
-      setVideoDataUrl("");
-    }
-  }, [current, isVideo, hasMedia, mediaSrcs]);
 
   const clearTimer = useCallback(() => {
     if (timerRef.current) { clearTimeout(timerRef.current); timerRef.current = null; }
@@ -127,28 +96,24 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
       return () => clearTimer();
     }
 
-    if (isVideo && videoDataUrl) {
-      const retryPlay = () => {
-        const video = videoRef.current;
-        if (video) {
-          video.muted = true;
-          video.currentTime = 0;
-          const onEnded = () => setCurrent((prev) => (prev + 1) % mediaCount);
-          video.addEventListener("ended", onEnded, { once: true });
-          video.play().catch(() => {
-            // Fallback: just advance after timeout
-            clearTimer();
-            timerRef.current = setTimeout(() => {
-              setCurrent((prev) => (prev + 1) % mediaCount);
-            }, IDLE_TIMEOUT);
-          });
-          return () => {
-            video.removeEventListener("ended", onEnded);
-            video.pause();
-          };
-        }
-      };
-      return retryPlay();
+    if (isVideo) {
+      const video = videoRef.current;
+      if (video) {
+        video.muted = true;
+        video.currentTime = 0;
+        const onEnded = () => setCurrent((prev) => (prev + 1) % mediaCount);
+        video.addEventListener("ended", onEnded, { once: true });
+        video.play().catch(() => {
+          clearTimer();
+          timerRef.current = setTimeout(() => {
+            setCurrent((prev) => (prev + 1) % mediaCount);
+          }, IDLE_TIMEOUT);
+        });
+        return () => {
+          video.removeEventListener("ended", onEnded);
+          video.pause();
+        };
+      }
     }
 
     if (!isVideo) {
@@ -157,7 +122,7 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
       }, IDLE_TIMEOUT);
       return () => clearTimer();
     }
-  }, [current, videoDataUrl, isVideo, hasMedia, mediaCount, clearTimer]);
+  }, [current, isVideo, hasMedia, mediaCount, clearTimer]);
 
   if (!hasMedia && !hasTicker) return null;
 
@@ -166,19 +131,20 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
       {hasMedia && (
         <div className="relative w-full overflow-hidden bg-black" style={{ maxHeight: "360px" }}>
           <div className="relative w-full" style={{ aspectRatio: "3/1", maxHeight: "360px" }}>
-            {isVideo && videoDataUrl ? (
+            {isVideo ? (
               <video
                 ref={setVideoRef}
-                src={videoDataUrl}
+                src={currentSrc}
                 muted
                 playsInline
                 webkit-playsinline="true"
                 x5-video-player-type="h5"
+                preload="auto"
                 className="absolute inset-0 w-full h-full object-contain opacity-100 z-10"
               />
             ) : (
               <img
-                src={mediaSrcs[current] || ""}
+                src={currentSrc}
                 alt="Ad"
                 className="absolute inset-0 w-full h-full object-cover opacity-100 z-10"
               />

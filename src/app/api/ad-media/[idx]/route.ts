@@ -40,15 +40,35 @@ export async function GET(
     const mimeMatch = header.match(/data:([^;]+)/);
     const mimeType = mimeMatch ? mimeMatch[1] : "application/octet-stream";
     const buffer = Buffer.from(base64, "base64");
+    const fileSize = buffer.length;
 
-    // For images: return binary directly so <img> tags work
-    // For videos: return binary (video elements handle it)
+    // Handle Range requests (critical for iOS Safari video playback)
+    const rangeHeader = request.headers.get("range");
+    if (rangeHeader) {
+      const parts = rangeHeader.replace(/bytes=/, "").split("-");
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+      const chunkSize = end - start + 1;
+      const chunk = buffer.subarray(start, end + 1);
+
+      return new NextResponse(chunk, {
+        status: 206,
+        headers: {
+          "Content-Range": `bytes ${start}-${end}/${fileSize}`,
+          "Accept-Ranges": "bytes",
+          "Content-Type": mimeType,
+          "Content-Length": chunkSize.toString(),
+          "Cache-Control": "public, max-age=31536000, immutable",
+        },
+      });
+    }
+
     return new NextResponse(buffer, {
       headers: {
         "Content-Type": mimeType,
-        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Length": fileSize.toString(),
         "Accept-Ranges": "bytes",
-        "Content-Length": buffer.length.toString(),
+        "Cache-Control": "public, max-age=31536000, immutable",
       },
     });
   } catch {
