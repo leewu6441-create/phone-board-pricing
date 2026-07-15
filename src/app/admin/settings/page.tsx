@@ -30,6 +30,7 @@ export default function AdminSettingsPage() {
     await Promise.all([
       save("facebook_link", fb), save("qrcode_image", qrcode), save("wechat_id", wechat), save("wechat_qrcode", wechatQrcode),
       save("ad_media", JSON.stringify(adMedia)), save("ticker_text", tickerText),
+      save("ad_images", JSON.stringify(adMedia)), // keep old key in sync for compatibility
       save("notice_text", notice), save("contact_phone", phone), save("site_name", site),
     ]);
     setSaving(false); toast.success(t("admin.settingsSaved"));

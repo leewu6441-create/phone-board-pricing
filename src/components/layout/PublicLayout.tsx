@@ -13,11 +13,14 @@ export async function PublicLayout({ children }: PublicLayoutProps) {
 
   let adMedia: { type: "image" | "video"; data: string }[] = [];
   try {
-    const raw = settings.ad_media || settings.ad_images || "";
-    if (raw) {
+    // Try new format first, fall back to old ad_images key
+    let raw = settings.ad_media;
+    if (!raw || raw === "[]") {
+      raw = settings.ad_images || "";
+    }
+    if (raw && raw !== "[]") {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        // Support both old format (plain strings) and new format (objects)
+      if (Array.isArray(parsed) && parsed.length > 0) {
         adMedia = parsed.map((item: any) =>
           typeof item === "string" ? { type: "image", data: item } : item
         );
