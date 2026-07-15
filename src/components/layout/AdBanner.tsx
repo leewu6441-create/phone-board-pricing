@@ -21,26 +21,24 @@ function isChinese(text: string): boolean {
 
 const transCache: Record<string, string> = {};
 
-// Cache for fetched blob URLs
-const blobCache: Record<string, string> = {};
+// Cache for fetched data URLs
+const dataUrlCache: Record<string, string> = {};
 
-// Fetch binary from API and convert to blob URL (bypasses video src loading)
-async function getBlobUrl(src: string): Promise<string> {
-  if (blobCache[src]) return blobCache[src];
-  // External URL or non-API src: use directly as video src
+// Fetch data URL from API
+async function getDataUrl(src: string): Promise<string> {
+  if (dataUrlCache[src]) return dataUrlCache[src];
   if (!src.startsWith("/api/ad-media/")) return src;
 
   try {
     const res = await fetch(src);
-    if (res.redirected) return res.url; // external HTTP redirect
-
+    if (res.redirected) return res.url;
     if (!res.ok) return src;
-
-    // Get binary blob directly from response
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    blobCache[src] = url;
-    return url;
+    const text = await res.text();
+    if (text.startsWith("data:")) {
+      dataUrlCache[src] = text;
+      return text;
+    }
+    return src;
   } catch {
     return src;
   }
@@ -51,7 +49,7 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
   const [current, setCurrent] = useState(0);
   const [muted, setMuted] = useState(true);
   const [displayTicker, setDisplayTicker] = useState(tickerText);
-  const [currentSrc, setCurrentSrc] = useState("");
+  const [videoDataUrl, setVideoDataUrl] = useState("");
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const setVideoRef = useCallback((el: HTMLVideoElement | null) => { videoRef.current = el; }, []);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -77,14 +75,14 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
       .catch(() => setDisplayTicker(tickerText));
   }, [tickerText, lang]);
 
-  // Fetch and convert video blob URL
+  // Fetch data URL for video
   useEffect(() => {
     if (!hasMedia) return;
     const src = mediaSrcs[current] || "";
     if (isVideo && src.startsWith("/api/ad-media/")) {
-      getBlobUrl(src).then(setCurrentSrc);
-    } else {
-      setCurrentSrc(src);
+      getDataUrl(src).then(setVideoDataUrl);
+    } else if (!isVideo) {
+      setVideoDataUrl("");
     }
   }, [current, isVideo, hasMedia, mediaSrcs]);
 
@@ -133,7 +131,7 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
       return () => clearTimer();
     }
 
-    if (isVideo && currentSrc) {
+    if (isVideo && videoDataUrl) {
       const retryPlay = () => {
         const video = videoRef.current;
         if (video) {
@@ -163,7 +161,7 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
       }, IDLE_TIMEOUT);
       return () => clearTimer();
     }
-  }, [current, currentSrc, isVideo, hasMedia, mediaCount, clearTimer]);
+  }, [current, videoDataUrl, isVideo, hasMedia, mediaCount, clearTimer]);
 
   if (!hasMedia && !hasTicker) return null;
 
@@ -172,20 +170,19 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
       {hasMedia && (
         <div className="relative w-full overflow-hidden bg-black" style={{ maxHeight: "360px" }}>
           <div className="relative w-full" style={{ aspectRatio: "3/1", maxHeight: "360px" }}>
-            {isVideo ? (
+            {isVideo && videoDataUrl ? (
               <video
                 ref={setVideoRef}
-                src={currentSrc}
+                src={videoDataUrl}
                 muted
                 playsInline
                 webkit-playsinline="true"
                 x5-video-player-type="h5"
-                preload="auto"
                 className="absolute inset-0 w-full h-full object-contain opacity-100 z-10"
               />
             ) : (
               <img
-                src={currentSrc || mediaSrcs[current]}
+                src={mediaSrcs[current] || ""}
                 alt="Ad"
                 className="absolute inset-0 w-full h-full object-cover opacity-100 z-10"
               />
