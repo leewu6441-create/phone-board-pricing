@@ -27,10 +27,11 @@ export async function PublicLayout({ children }: PublicLayoutProps) {
         mediaSrcs = parsed.map((item: any, i: number) => {
           const data = typeof item === "string" ? item : item.data;
           const type = typeof item === "string" ? "image" : item.type || "image";
-          // For external video URLs, pass directly (no API proxy needed)
-          if (type === "video" && data.startsWith("http")) return data;
-          // For base64 images/videos, use API endpoint
-          return `/api/ad-media?idx=${i}`;
+          // External URLs: pass directly
+          if (data.startsWith("http")) return data;
+          // Base64: use extension-based URL for mobile compatibility
+          const ext = type === "video" ? "mp4" : data.includes("image/png") ? "png" : "jpg";
+          return `/api/ad-media/${i}.${ext}`;
         });
       }
     }

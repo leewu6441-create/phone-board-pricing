@@ -27,8 +27,6 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
   const [current, setCurrent] = useState(0);
   const [muted, setMuted] = useState(true);
   const [displayTicker, setDisplayTicker] = useState(tickerText);
-  const [videoReady, setVideoReady] = useState(false);
-  const [needTap, setNeedTap] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const setVideoRef = useCallback((el: HTMLVideoElement | null) => { videoRef.current = el; }, []);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -81,19 +79,8 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
     if (videoRef.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
-      setVideoReady(false);
-      setNeedTap(false);
     }
   }, []);
-
-  // Manual play for mobile (user tap)
-  const manualPlay = useCallback(() => {
-    const video = videoRef.current;
-    if (video && needTap) {
-      video.muted = true;
-      video.play().then(() => setNeedTap(false)).catch(() => {});
-    }
-  }, [needTap]);
 
   const goTo = useCallback((idx: number) => {
     stopVideo();
@@ -130,54 +117,26 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
     }
 
     if (isVideo) {
-      setVideoReady(false);
-      setNeedTap(false);
-
-      const tryPlay = (attempts: number) => {
+      const tryPlay = () => {
         const video = videoRef.current;
-        if (video) {
-          video.currentTime = 0;
-          video.muted = true; // force muted for autoplay
-          video.playsInline = true;
-          video.setAttribute("playsinline", "");
-          video.setAttribute("webkit-playsinline", "");
-
-          const onEnded = () => setCurrent((prev) => (prev + 1) % mediaCount);
-          const onCanPlay = () => {
-            setVideoReady(true);
-            video.play().then(() => {
-              setNeedTap(false);
-            }).catch(() => {
-              // Autoplay blocked (mobile) — show tap hint, schedule advance
-              setNeedTap(true);
-              clearTimer();
-              timerRef.current = setTimeout(() => {
-                setCurrent((prev) => (prev + 1) % mediaCount);
-              }, IDLE_TIMEOUT);
-            });
-          };
-
-          if (video.readyState >= 3) {
-            onCanPlay();
-          } else {
-            video.addEventListener("canplay", onCanPlay, { once: true });
-            video.load();
-          }
-
-          video.addEventListener("ended", onEnded, { once: true });
-          return () => {
-            video.removeEventListener("ended", onEnded);
-            video.removeEventListener("canplay", onCanPlay);
-            video.pause();
-            setVideoReady(false);
-            setNeedTap(false);
-          };
-        } else if (attempts > 0) {
-          const id = requestAnimationFrame(() => tryPlay(attempts - 1));
-          return () => cancelAnimationFrame(id);
-        }
+        if (!video) return;
+        video.currentTime = 0;
+        video.muted = true;
+        const onEnded = () => setCurrent((prev) => (prev + 1) % mediaCount);
+        video.addEventListener("ended", onEnded, { once: true });
+        video.play().catch(() => {
+          // If autoplay fails, just advance after timeout
+          clearTimer();
+          timerRef.current = setTimeout(() => {
+            setCurrent((prev) => (prev + 1) % mediaCount);
+          }, IDLE_TIMEOUT);
+        });
+        return () => {
+          video.removeEventListener("ended", onEnded);
+          video.pause();
+        };
       };
-      return tryPlay(20);
+      return tryPlay();
     } else {
       timerRef.current = setTimeout(() => {
         setCurrent((prev) => (prev + 1) % mediaCount);
@@ -189,22 +148,7 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
   if (!hasMedia && !hasTicker) return null;
 
   const mediaContent = hasMedia && (
-    <div className="relative w-full overflow-hidden bg-black" style={{ maxHeight: "360px" }} onClick={manualPlay}>
-      {/* Video loading spinner */}
-      {isVideo && !videoReady && !needTap && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/60">
-          <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-        </div>
-      )}
-      {/* Mobile tap-to-play overlay */}
-      {isVideo && needTap && (
-        <div className="absolute inset-0 z-30 flex items-center justify-center bg-black/50 cursor-pointer">
-          <div className="text-white text-center">
-            <svg className="w-12 h-12 mx-auto mb-2" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-            <span className="text-sm font-medium">Tap to play</span>
-          </div>
-        </div>
-      )}
+    <div className="relative w-full overflow-hidden bg-black" style={{ maxHeight: "360px" }}>
       <div className="relative w-full" style={{ aspectRatio: "3/1", maxHeight: "360px" }}>
         <MediaItem
           type={mediaTypes[current]}
@@ -297,10 +241,14 @@ function MediaItem({
       <video
         ref={isActive ? setVideoRef : undefined}
         src={isActive ? src : undefined}
-        muted={muted}
+        muted
         playsInline
+        webkit-playsinline="true"
+        x5-video-player-type="h5"
+        x5-video-player-fullscreen="false"
         preload="auto"
         controls={false}
+        disableRemotePlayback
         className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ${
           isActive ? "opacity-100 z-10" : "opacity-0 pointer-events-none"
         }`}
