@@ -24,6 +24,8 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
   const { lang } = useTranslation();
   const [current, setCurrent] = useState(0);
   const [muted, setMuted] = useState(false);
+  const [started, setStarted] = useState(false);
+  const [showPlayBtn, setShowPlayBtn] = useState(false);
   const [displayTicker, setDisplayTicker] = useState(tickerText);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const setVideoRef = useCallback((el: HTMLVideoElement | null) => { videoRef.current = el; }, []);
@@ -59,8 +61,21 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
     if (videoRef.current) {
       videoRef.current.pause();
       videoRef.current.currentTime = 0;
+      setStarted(false);
+      setShowPlayBtn(false);
     }
   }, []);
+
+  const manualPlay = useCallback(() => {
+    const video = videoRef.current;
+    if (video) {
+      video.muted = muted;
+      video.play().then(() => {
+        setStarted(true);
+        setShowPlayBtn(false);
+      }).catch(() => {});
+    }
+  }, [muted]);
 
   const goTo = useCallback((idx: number) => {
     stopVideo();
@@ -97,17 +112,20 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
     }
 
     if (isVideo) {
+      setShowPlayBtn(false);
       const video = videoRef.current;
       if (video) {
         video.muted = muted;
         video.currentTime = 0;
         const onEnded = () => setCurrent((prev) => (prev + 1) % mediaCount);
         video.addEventListener("ended", onEnded, { once: true });
-        video.play().catch(() => {
+        video.play().then(() => {
+          setStarted(true);
+          setShowPlayBtn(false);
+        }).catch(() => {
+          // Autoplay blocked (mobile) — show play button
+          setShowPlayBtn(true);
           clearTimer();
-          timerRef.current = setTimeout(() => {
-            setCurrent((prev) => (prev + 1) % mediaCount);
-          }, IDLE_TIMEOUT);
         });
         return () => {
           video.removeEventListener("ended", onEnded);
@@ -132,16 +150,25 @@ export function AdBanner({ mediaCount, mediaTypes, mediaLinks, mediaSrcs, ticker
         <div className="relative w-full overflow-hidden bg-black" style={{ maxHeight: "480px" }}>
           <div className="relative w-full" style={{ aspectRatio: "2/1", maxHeight: "480px" }}>
             {isVideo ? (
-              <video
-                ref={setVideoRef}
-                src={currentSrc}
-                muted
-                playsInline
-                webkit-playsinline="true"
-                x5-video-player-type="h5"
-                preload="auto"
-                className="absolute inset-0 w-full h-full object-contain opacity-100 z-10"
-              />
+              <>
+                <video
+                  ref={setVideoRef}
+                  src={currentSrc}
+                  muted={muted}
+                  playsInline
+                  webkit-playsinline="true"
+                  x5-video-player-type="h5"
+                  preload="auto"
+                  className="absolute inset-0 w-full h-full object-contain z-10"
+                />
+                {showPlayBtn && (
+                  <button onClick={manualPlay} className="absolute inset-0 z-30 flex items-center justify-center bg-black/50">
+                    <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
+                      <svg className="w-7 h-7 text-gray-900 ml-1" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    </div>
+                  </button>
+                )}
+              </>
             ) : (
               <img
                 src={currentSrc}
