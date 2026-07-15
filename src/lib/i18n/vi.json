@@ -145,6 +145,13 @@
 
   "admin.settingsTitle": "Cài đặt trang web",
   "admin.saveSettings": "Lưu cài đặt",
+  "admin.adImages": "Ảnh quảng cáo",
+  "admin.adImagesDesc": "Tải lên ảnh banner hiển thị ở đầu trang. Có thể thêm nhiều ảnh.",
+  "admin.adAddImage": "Thêm ảnh",
+  "admin.adImageHint": "Tối đa 500KB mỗi ảnh. Khuyến nghị kích thước 1200x400px.",
+  "admin.tickerText": "Chữ chạy",
+  "admin.tickerDesc": "Dòng chữ chạy ngang hiển thị dưới banner quảng cáo.",
+  "admin.tickerPlaceholder": "Nhập nội dung thông báo chạy ngang...",
   "admin.zaloLink": "Liên kết Zalo",
   "admin.zaloDesc": "Link Zalo cá nhân. VD: https://zalo.me/0912345678",
   "admin.fbLink": "Liên kết Facebook",

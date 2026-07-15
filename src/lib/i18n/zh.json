@@ -145,6 +145,13 @@
 
   "admin.settingsTitle": "网站设置",
   "admin.saveSettings": "保存设置",
+  "admin.adImages": "广告图片",
+  "admin.adImagesDesc": "上传页面顶部显示的横幅图片。可添加多张轮播。",
+  "admin.adAddImage": "添加图片",
+  "admin.adImageHint": "每张最大 500KB，推荐尺寸 1200x400px。",
+  "admin.tickerText": "滚动文字",
+  "admin.tickerDesc": "在广告横幅下方显示的滚动公告文字。",
+  "admin.tickerPlaceholder": "输入滚动公告内容...",
   "admin.zaloLink": "Zalo 链接",
   "admin.zaloDesc": "您的 Zalo 链接。例如：https://zalo.me/0912345678",
   "admin.fbLink": "Facebook 链接",

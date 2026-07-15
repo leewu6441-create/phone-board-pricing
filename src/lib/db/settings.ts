@@ -7,6 +7,8 @@ const defaults: Record<string, string> = {
   qrcode_image: DEFAULT_QRCODE_IMAGE,
   wechat_id: DEFAULT_WECHAT_ID,
   wechat_qrcode: DEFAULT_WECHAT_QRCODE,
+  ad_images: "[]",
+  ticker_text: "",
   contact_phone: "",
   notice_text: "",
   site_name: "Vertex",
