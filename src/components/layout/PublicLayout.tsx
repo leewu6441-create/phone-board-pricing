@@ -18,6 +18,7 @@ export async function PublicLayout({ children }: PublicLayoutProps) {
       <FloatingContact
         facebookLink={settings.facebook_link || "https://facebook.com/groups/your-group"}
         wechatId={settings.wechat_id || ""}
+        showWechat={!!(settings.wechat_id || settings.wechat_qrcode)}
       />
     </div>
   );

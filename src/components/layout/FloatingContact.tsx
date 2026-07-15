@@ -15,9 +15,10 @@ import {
 interface FloatingContactProps {
   facebookLink: string;
   wechatId: string;
+  showWechat: boolean;
 }
 
-export function FloatingContact({ facebookLink, wechatId }: FloatingContactProps) {
+export function FloatingContact({ facebookLink, wechatId, showWechat }: FloatingContactProps) {
   const [expanded, setExpanded] = useState(false);
   const [zaloQrOpen, setZaloQrOpen] = useState(false);
   const [wechatOpen, setWechatOpen] = useState(false);
@@ -63,7 +64,7 @@ export function FloatingContact({ facebookLink, wechatId }: FloatingContactProps
           </button>
 
           {/* WeChat */}
-          {wechatId && (
+          {showWechat && (
             <button
               onClick={() => { setWechatOpen(true); setExpanded(false); }}
               className="flex items-center gap-2 bg-[#07C160] text-white px-4 py-2.5 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105"
