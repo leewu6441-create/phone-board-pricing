@@ -41,6 +41,12 @@
 
   "contact.fbGroup": "Facebook Group",
   "contact.chatZalo": "Chat Zalo",
+  "contact.qrCode": "Scan QR Code",
+  "contact.scanQr": "Scan QR code to add on Zalo",
+  "contact.wechat": "WeChat",
+  "contact.wechatId": "WeChat ID",
+  "contact.copyWechat": "Copy ID",
+  "contact.copied": "Copied!",
   "contact.title": "Contact",
   "contact.joinFb": "Join Facebook Group",
   "contact.zalo": "Contact via Zalo",
@@ -128,5 +134,10 @@
   "admin.siteName": "Site Name",
   "admin.notice": "Notice",
   "admin.noticeDesc": "Displayed at the top of the homepage",
+  "admin.qrCodeImage": "QR Code Image",
+  "admin.qrCodeDesc": "Upload a QR code image for Zalo. Supports JPG, PNG.",
+  "admin.qrCodeUpload": "Upload Image",
+  "admin.wechatId": "WeChat ID",
+  "admin.wechatDesc": "Your WeChat ID. e.g. wxid_abc123",
   "admin.settingsSaved": "Settings saved"
 }

@@ -41,6 +41,12 @@
 
   "contact.fbGroup": "Facebook 群组",
   "contact.chatZalo": "Zalo 聊天",
+  "contact.qrCode": "扫二维码",
+  "contact.scanQr": "扫描二维码添加 Zalo 好友",
+  "contact.wechat": "微信",
+  "contact.wechatId": "微信号",
+  "contact.copyWechat": "复制ID",
+  "contact.copied": "已复制！",
   "contact.title": "联系",
   "contact.joinFb": "加入 Facebook 群组",
   "contact.zalo": "通过 Zalo 联系",
@@ -128,5 +134,10 @@
   "admin.siteName": "网站名称",
   "admin.notice": "公告",
   "admin.noticeDesc": "显示在首页顶部",
+  "admin.qrCodeImage": "二维码图片",
+  "admin.qrCodeDesc": "上传 Zalo 二维码图片。支持 JPG、PNG 格式。",
+  "admin.qrCodeUpload": "上传图片",
+  "admin.wechatId": "微信号",
+  "admin.wechatDesc": "您的微信号。例如：wxid_abc123",
   "admin.settingsSaved": "设置已保存"
 }

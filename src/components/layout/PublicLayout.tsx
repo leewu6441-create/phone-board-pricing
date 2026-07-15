@@ -18,6 +18,8 @@ export async function PublicLayout({ children }: PublicLayoutProps) {
       <FloatingContact
         zaloLink={settings.zalo_link || "https://zalo.me/your-zalo-phone"}
         facebookLink={settings.facebook_link || "https://facebook.com/groups/your-group"}
+        qrcodeImage={settings.qrcode_image || ""}
+        wechatId={settings.wechat_id || ""}
       />
     </div>
   );

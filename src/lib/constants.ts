@@ -7,6 +7,10 @@ export const DEFAULT_ZALO_LINK = "https://zalo.me/your-zalo-phone";
 
 export const DEFAULT_FACEBOOK_LINK = "https://facebook.com/groups/your-group";
 
+export const DEFAULT_QRCODE_IMAGE = "";
+
+export const DEFAULT_WECHAT_ID = "";
+
 export const CATEGORIES = [
   { name: "Apple", slug: "apple", icon: "🍎" },
   { name: "Android", slug: "android", icon: "🤖" },

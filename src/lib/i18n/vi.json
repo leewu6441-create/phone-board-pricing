@@ -41,6 +41,12 @@
 
   "contact.fbGroup": "Nhóm Facebook",
   "contact.chatZalo": "Chat Zalo",
+  "contact.qrCode": "Quét mã QR",
+  "contact.scanQr": "Quét mã QR để kết bạn Zalo",
+  "contact.wechat": "WeChat",
+  "contact.wechatId": "ID WeChat",
+  "contact.copyWechat": "Sao chép ID",
+  "contact.copied": "Đã sao chép!",
   "contact.title": "Liên hệ",
   "contact.joinFb": "Tham gia nhóm Facebook",
   "contact.zalo": "Liên hệ qua Zalo",
@@ -128,5 +134,10 @@
   "admin.siteName": "Tên trang web",
   "admin.notice": "Thông báo",
   "admin.noticeDesc": "Hiển thị ở đầu trang chủ",
+  "admin.qrCodeImage": "Ảnh mã QR",
+  "admin.qrCodeDesc": "Tải lên ảnh mã QR Zalo để khách quét. Hỗ trợ JPG, PNG.",
+  "admin.qrCodeUpload": "Tải ảnh lên",
+  "admin.wechatId": "ID WeChat",
+  "admin.wechatDesc": "ID WeChat của bạn. VD: wxid_abc123",
   "admin.settingsSaved": "Đã lưu cài đặt"
 }
