@@ -23,6 +23,7 @@ export default function AdminSettingsPage() {
   const zaloQrRef = useRef<HTMLInputElement>(null);
   const wechatQrRef = useRef<HTMLInputElement>(null);
   const adImageRef = useRef<HTMLInputElement>(null);
+  const adVideoRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { fetch("/api/admin/settings").then((r) => r.json()).then((data: any[]) => { data.forEach((s: any) => { switch (s.key) {
     case "facebook_link": setFb(s.value); break;
@@ -72,12 +73,14 @@ export default function AdminSettingsPage() {
     if (adImageRef.current) adImageRef.current.value = "";
   };
 
-  const addAdVideo = () => {
-    const url = videoUrl.trim();
-    if (!url) { toast.error("Enter a video URL"); return; }
-    if (!url.startsWith("http")) { toast.error("URL must start with http:// or https://"); return; }
-    setAdMedia((prev) => [...prev, { type: "video", data: url }]);
-    setVideoUrl("");
+  const addAdVideoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 15 * 1024 * 1024) { toast.error("Video too large (max 15MB)"); return; }
+    const reader = new FileReader();
+    reader.onload = () => { setAdMedia((prev) => [...prev, { type: "video", data: reader.result as string }]); };
+    reader.readAsDataURL(file);
+    if (adVideoRef.current) adVideoRef.current.value = "";
   };
 
   const removeAdMedia = (idx: number) => setAdMedia((prev) => prev.filter((_, i) => i !== idx));
@@ -136,9 +139,17 @@ export default function AdminSettingsPage() {
               <input ref={adImageRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={addAdImage} className="hidden" />
               <span className="text-xs text-gray-400 self-center">{t("admin.adImageHint")}</span>
             </div>
-            <div className="flex gap-2">
-              <Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://example.com/video.mp4" className="flex-1 h-9 text-sm" />
-              <Button type="button" variant="outline" size="sm" onClick={addAdVideo}><Video size={14} className="mr-1" />{t("admin.adAddVideo")}</Button>
+            <div className="flex gap-2 flex-wrap items-center">
+              <Button type="button" variant="outline" size="sm" onClick={() => adVideoRef.current?.click()}><Video size={14} className="mr-1" />{t("admin.adUploadVideo")}</Button>
+              <input ref={adVideoRef} type="file" accept="video/mp4,video/webm" onChange={addAdVideoFile} className="hidden" />
+              <span className="text-xs text-gray-400">or</span>
+              <Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="https://..." className="flex-1 min-w-[200px] h-9 text-sm" />
+              <Button type="button" variant="outline" size="sm" onClick={() => {
+                const url = videoUrl.trim();
+                if (!url || !url.startsWith("http")) { toast.error("Enter a valid URL"); return; }
+                setAdMedia((prev) => [...prev, { type: "video", data: url }]);
+                setVideoUrl("");
+              }}><Video size={14} className="mr-1" />{t("admin.adAddVideo")}</Button>
             </div>
           </div>
         </CardContent></Card>
